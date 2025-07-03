@@ -1,0 +1,16 @@
+<h1>Creation du profil prestataire</h1>
+<%= form_with model: @provider do |form| %>
+  <div class="invalid-feedback d-block">
+  </div>
+  <div>
+    <%= form.label :business %>
+    <%= form.text_field :business %>
+    <%= form.label :address %>
+    <%= form.text_field :address %>
+    <%= form.label :type_provider%>
+    <%= form.select :type_provider, Provider.type_providers.keys.map{|t| [t.humanize.capitalize, t ]}, prompt: "choisissez un type" %>
+  </div>
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
