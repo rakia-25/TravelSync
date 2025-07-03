@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_02_121012) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_03_090716) do
   create_table "cars", force: :cascade do |t|
     t.integer "provider_id", null: false
     t.string "brand"
-    t.string "type"
+    t.string "name"
     t.decimal "price"
     t.string "options"
     t.boolean "available"
@@ -47,9 +47,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_02_121012) do
     t.index ["provider_id"], name: "index_hotels_on_provider_id"
   end
 
+  create_table "profil_providers", force: :cascade do |t|
+    t.string "business_name"
+    t.string "type_provider"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_profil_providers_on_user_id"
+  end
+
   create_table "providers", force: :cascade do |t|
     t.string "business"
-    t.string "type"
+    t.string "type_provider"
     t.string "address"
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
@@ -60,7 +69,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_02_121012) do
   create_table "rooms", force: :cascade do |t|
     t.integer "hotel_id", null: false
     t.string "services"
-    t.string "type"
+    t.string "type_room"
     t.decimal "price"
     t.boolean "available"
     t.datetime "created_at", null: false
@@ -93,7 +102,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_02_121012) do
     t.datetime "updated_at", null: false
     t.string "role"
     t.integer "phone"
-    t.string "firts_name"
+    t.string "first_name"
     t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -103,6 +112,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_02_121012) do
   add_foreign_key "hotel_trips", "hotels"
   add_foreign_key "hotel_trips", "trips"
   add_foreign_key "hotels", "providers"
+  add_foreign_key "profil_providers", "users"
   add_foreign_key "providers", "users"
   add_foreign_key "rooms", "hotels"
   add_foreign_key "trips", "providers"
