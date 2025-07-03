@@ -15,6 +15,6 @@ Rails.application.routes.draw do
   end
 
   resources :cars
-  resources :trips
+  resources :trips, only: [:new, :create, :edit, :update, :destroy, :show]
   
 end

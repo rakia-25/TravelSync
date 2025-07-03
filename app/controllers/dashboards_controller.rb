@@ -9,6 +9,7 @@ class DashboardsController < ApplicationController
         elsif @provider.rental_agency?
             render "dashboards/rental_agency"
         elsif @provider.travel_agency?
+            @trips = @provider.trips
             render "dashboards/travel_agency"
         else
             redirect_to root_path, alert: "Type de prestataire non reconnu."
