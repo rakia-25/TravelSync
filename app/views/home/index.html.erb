@@ -7,9 +7,9 @@
         Déconnexion
       </button>
     <% end %>
-  <% else %>
-    <h1 class="text-4xl font-bold mb-4 text-indigo-700 text-center">
-      Bienvenue sur mon application de gestion de voyages
-    </h1>
-    <%= link_to "Se connecter", new_user_session_path, class: "bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-200" %>
-  <% end %>
+<% else %>
+  <h1 class="text-4xl font-bold mb-4 text-indigo-700 text-center">
+    Bienvenue sur mon application de gestion de voyages
+  </h1>
+  <%= link_to "Se connecter", new_user_session_path, class: "bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-200" %>
+<% end %>

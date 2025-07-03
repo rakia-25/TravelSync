@@ -1,0 +1,35 @@
+<h1>Bienvenue dans votre espace agence de voyage</h1>
+<%= link_to "Nouveau circuit", new_trip_path %>
+
+<h1>Liste des circuits</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Titre</th>
+      <th>Thème</th>
+      <th>Durée</th>
+      <th>Départ</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @trips.each do |trip| %>
+      <tr>
+        <td><%= trip.title %></td>
+        <td><%= trip.theme %></td>
+        <td><%= trip.duration %> jours</td>
+        <td><%= trip.departureDate.strftime("%d/%m/%Y") if trip.departureDate %></td>
+        <td>
+          <%= link_to "Voir", trip_path(trip) %> |
+          <%= link_to "Modifier", edit_trip_path(trip) %>
+          <%= form_with url: trip_path(trip), method: :delete do %>
+            <button type="submit">
+              supprimer
+            </button>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

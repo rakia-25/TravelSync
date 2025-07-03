@@ -1,11 +1,8 @@
 class CarsController < ApplicationController
 
-
+  before_action :authenticate_user!
+  before_action :check_rental_agency
   before_action :set_car, only: [:show, :edit, :update, :destroy]
-
-  def index
-    @cars = Car.all
-  end
 
   def show
   end
@@ -15,9 +12,9 @@ class CarsController < ApplicationController
   end
 
   def create
-    @car = Car.new(car_params)
+    @car = current_user.provider.cars.build(car_params)
     if @car.save
-      redirect_to @car, notice: "Voiture créée avec succès."
+      redirect_to dashboard_provider_path, notice: "Voiture créée avec succès."
     else
       render :new
     end
@@ -42,11 +39,21 @@ class CarsController < ApplicationController
   private
 
   def set_car
-    @car = Car.find(params[:id])
+    @car = current_user.provider.cars.find(params[:id])
   end
 
   def car_params
-    params.require(:car).permit(:provider_id, :brand, :name, :price, :options, :available, :model)
+    params.require(:car).permit(:brand, :name, :price, :options, :available, :model)
+  end
+  def check_rental_agency
+
+    if current_user.provider.nil?
+      redirect_to new_provider_path, alert: "Complétez d'abord votre profil de prestataire." and return
+    end
+
+    unless current_user.provider.rental_agency?
+      redirect_to root_path, alert: "Accès réservé aux prestataires agence de location." and return
+    end
   end
 end
 
