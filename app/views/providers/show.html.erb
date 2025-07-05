@@ -1,0 +1,7 @@
+<h1>Profil Prestataire</h1>
+<p><strong>Entreprise :</strong> <%= @provider.business %></p>
+<p><strong>Type :</strong> <%= @provider.type_provider.humanize %></p>
+<p><strong>Adresse :</strong> <%= @provider.address %></p>
+<%= link_to 'Modifier', edit_provider_path %> |
+<%= button_to 'Supprimer', provider_path, method: :delete, data: { confirm: "Voulez-vous vraiment supprimer votre profil ?" } %> |
+<%= link_to 'Retour au tableau de bord', dashboard_provider_path %>
