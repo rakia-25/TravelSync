@@ -7,6 +7,7 @@ class DashboardsController < ApplicationController
         if @provider.hotelier?
             render "dashboards/hotelier"
         elsif @provider.rental_agency?
+            @cars = @provider.cars
             render "dashboards/rental_agency"
         elsif @provider.travel_agency?
             @trips = @provider.trips

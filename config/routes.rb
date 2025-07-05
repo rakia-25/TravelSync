@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   resources :hotels do 
     resources :rooms
   end
-
+  resources :cars, only: [:new, :create, :edit, :update, :destroy, :show]
   resources :cars
   resources :trips, only: [:new, :create, :edit, :update, :destroy, :show]
   

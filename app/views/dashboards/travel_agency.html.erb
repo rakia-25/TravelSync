@@ -24,6 +24,10 @@
           <%= link_to "Voir", trip_path(trip) %> |
           <%= link_to "Modifier", edit_trip_path(trip) %>
           <%= form_with url: trip_path(trip), method: :delete do %>
+            <button type="submit">
+              supprimer
+            </button>
+          <% end %>
           <button type="submit">
             supprimer
           </button>
