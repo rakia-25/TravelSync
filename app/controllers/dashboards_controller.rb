@@ -5,6 +5,7 @@ class DashboardsController < ApplicationController
     def provider
         @provider=current_user.provider
         if @provider.hotelier?
+            @hotels = @provider.hotels
             render "dashboards/hotelier"
         elsif @provider.rental_agency?
             @cars = @provider.cars

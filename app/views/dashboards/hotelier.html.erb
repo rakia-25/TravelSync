@@ -1,1 +1,40 @@
-<h1>Bienvenue dans votre espace hotelier</h1>
+<h1 class="text-2xl font-bold mb-4">Bienvenue dans votre espace hôtelier</h1>
+<p class="mb-2 text-gray-600">
+  Prestataire : <strong><%= @provider.business %></strong><br>
+  Adresse : <%= @provider.address %>
+</p>
+<%= link_to "➕ Ajouter un hôtel", new_hotel_path, class: "btn btn-primary mb-4" %>
+<% if @hotels.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @hotels.each do |hotel| %>
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold"><%= hotel.name %> (<%= hotel.stars %> etoiles)</h3>
+        <p class="text-sm text-gray-600"> <%= hotel.city %></p>
+        <p class="text-sm text-gray-700"><%= truncate(hotel.description, length: 100) %></p>
+        <% if hotel.images.attached? %>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <% hotel.images.first(3).each do |image| %>
+              <div class="relative inline-block">
+                <%= link_to url_for(image), target: "_blank", rel: "noopener" do %>
+                  <%= image_tag image.variant(resize_to_limit: [300, 200]).processed, alt: "#{hotel.name} - photo", class: "rounded shadow cursor-pointer" %>
+                <% end %>
+                <%= button_to "Supprimer", hotel_purge_image_path(id: image.id, hotel_id: hotel.id), method: :delete,
+      data: { confirm: "Voulez-vous supprimer cette image ?" },
+      class: "absolute top-0 right-0 bg-red-600 text-white rounded px-1 py-0.5 text-xs" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="italic text-sm text-gray-400 mt-2">Aucune image disponible</p>
+        <% end %>
+        <div class="mt-4 flex gap-2">
+          <%= link_to "Voir", hotel_path(hotel), class: "btn btn-sm btn-info" %>
+          <%= link_to "Modifier", edit_hotel_path(hotel), class: "btn btn-sm btn-warning" %>
+          <%= button_to "Supprimer", hotel_path(hotel), method: :delete, data: { confirm: "Supprimer cet hôtel ?" }, class: "btn btn-sm btn-danger" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-gray-500 italic">Vous n'avez encore enregistré aucun hôtel.</p>
+<% end %>
