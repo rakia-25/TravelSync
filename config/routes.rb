@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   get "dashboard/provider", to: "dashboards#provider", as: :dashboard_provider
-  resources :providers, only: [:new, :create]
+  resource :provider, only: [:new, :create, :show, :edit, :update,:destroy]
   resources :hotels do 
     resources :rooms
   end
