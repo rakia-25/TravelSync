@@ -1,0 +1,50 @@
+<h1 class="text-2xl font-bold mb-4"><%= @hotel.name %> (<%= @hotel.stars %> étoiles)</h1>
+<p class="text-gray-600 mb-2">
+  <strong>Adresse :</strong> <%= @hotel.address %>, <%= @hotel.city %><br>
+  <strong>GPS :</strong> <%= @hotel.gps %><br>
+  <strong>Services :</strong> <%= @hotel.service %><br>
+  <strong>Description :</strong> <%= @hotel.description %>
+</p>
+<% if @hotel.images.attached? %>
+  <h3 class="text-lg font-semibold mt-4">Photos de l'hôtel</h3>
+  <div class="flex flex-wrap gap-4 mb-6">
+    <% @hotel.images.each do |image| %>
+      <div class="relative">
+        <%= image_tag image.variant(resize_to_limit: [300, 200]).processed, class: "rounded shadow" %>
+        <%= button_to "Supprimer", hotel_purge_image_path(id: image.id, hotel_id: @hotel.id), method: :delete,
+      data: { confirm: "Voulez-vous supprimer cette image ?" },
+      class: "absolute top-0 right-0 bg-red-600 text-white rounded px-1 py-0.5 text-xs" %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="italic text-sm text-gray-500">Aucune image enregistrée pour cet hôtel.</p>
+<% end %>
+<hr class="my-6">
+<h2 class="text-xl font-bold mb-2">Chambres</h2>
+<%= link_to "Ajouter une chambre", new_hotel_room_path(@hotel), class: "btn btn-sm btn-success mb-4" %>
+<% if @hotel.rooms.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <% @hotel.rooms.each do |room| %>
+      <div class="bg-white p-4 rounded shadow">
+        <h4 class="text-lg font-semibold"><%= room.type_room %></h4>
+        <p class="text-sm text-gray-600">
+          <p><strong>Nombre de lits :</strong> <%= room.beds %></p>
+          <strong>Prix :</strong> <%= number_to_currency(room.price) %><br>
+          <strong>Services :</strong> <%= room.services %><br>
+          <strong>Disponible :</strong> <%= room.available ? "Oui" : "Non" %>
+        </p>
+        <div class="mt-2 flex gap-2">
+          <%= link_to "Modifier", edit_hotel_room_path(@hotel, room), class: "btn btn-sm btn-warning" %>
+          <%= button_to "Supprimer", hotel_room_path(@hotel, room), method: :delete,
+                    data: { confirm: "Supprimer cette chambre ?" },
+                    class: "btn btn-sm btn-danger" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="italic text-gray-500">Aucune chambre enregistrée pour cet hôtel.</p>
+<% end %>
+<hr class="my-6">
+<%= link_to "⬅ Retour à la liste des hôtels", dashboard_provider_path, class: "text-blue-600 underline" %>

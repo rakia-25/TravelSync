@@ -3,7 +3,7 @@
   Prestataire : <strong><%= @provider.business %></strong><br>
   Adresse : <%= @provider.address %>
 </p>
-<%= link_to "➕ Ajouter un hôtel", new_hotel_path, class: "btn btn-primary mb-4" %>
+<%= link_to "Ajouter un hôtel", new_hotel_path, class: "btn btn-primary mb-4" %>
 <% if @hotels.any? %>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% @hotels.each do |hotel| %>
