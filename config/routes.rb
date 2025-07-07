@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   resource :provider, only: [:new, :create, :show, :edit, :update,:destroy]
   resources :hotels do 
     delete 'purge_image/:id', to: 'hotels#purge_image', as: :purge_image
+    resources :rooms
   end
   resources :cars, only: [:new, :create, :edit, :update, :destroy, :show]
   resources :cars
