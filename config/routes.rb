@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   get "dashboard/provider", to: "dashboards#provider", as: :dashboard_provider
   resource :provider, only: [:new, :create, :show, :edit, :update,:destroy]
   resources :hotels do 
-    resources :rooms
+    delete 'purge_image/:id', to: 'hotels#purge_image', as: :purge_image
   end
   resources :cars, only: [:new, :create, :edit, :update, :destroy, :show]
   resources :cars
