@@ -1,0 +1,17 @@
+<h1>Bienvenue, <%= current_user.first_name %> <%= current_user.last_name   %>!</h1>
+<% if user_signed_in? %>
+  <%= form_with url: destroy_user_session_path, method: :delete do %>
+    <button type="submit"
+              class="bg-red-600 text-white py-2 px-6 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200">
+      Déconnexion
+    </button>
+  <% end %>
+<% end %>
+<nav class="flex gap-4 mt-6">
+  <%= link_to "Voyages",customer_trips_path, class: "btn btn-primary" %>
+  <%= link_to "Hôtels",customer_hotels_path, class: "btn btn-primary" %>
+  <%= link_to "Voitures", customer_cars_path, class: "btn btn-primary" %>
+  <% if user_signed_in? && current_user.customer? %>
+    <%= link_to "Mes réservations", customer_reservations_path, class: "text-white" %>
+  <% end %>
+</nav>

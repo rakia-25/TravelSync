@@ -1,15 +1,83 @@
-<% if user_signed_in? %>
-  <p class="font-semibold text-xl text-gray-800 mb-6">
-    Bienvenue <%= current_user.last_name %>
-    <%= form_with url: destroy_user_session_path, method: :delete do %>
-      <button type="submit"
-              class="bg-red-600 text-white py-2 px-6 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200">
-        Déconnexion
-      </button>
-    <% end %>
-<% else %>
+<!-- ✅ Menu visible uniquement pour les utilisateurs avec le rôle 'client' -->
+<!-- ✅ Contenu principal -->
+<main class="max-w-4xl mx-auto px-4">
+  <% if user_signed_in? %>
+    <p class="font-semibold text-xl text-gray-800 mb-6">
+      Bienvenue <%= current_user.first_name %> <%= current_user.last_name %><br>
+      Vous êtes connecté en tant que <%= current_user.role %>.
+    </p>
+  <% end %>
   <h1 class="text-4xl font-bold mb-4 text-indigo-700 text-center">
-    Bienvenue sur mon application de gestion de voyages
+    Bienvenue sur TravelSync
   </h1>
-  <%= link_to "Se connecter", new_user_session_path, class: "bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-200" %>
-<% end %>
+  <p class="text-center mb-4 text-gray-600">Planifiez vos voyages, hôtels et voitures facilement.</p>
+  <div class="text-center">
+    <% if not user_signed_in? %>
+      <%= link_to "Se connecter", new_user_session_path, class: "bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700" %>
+    </div>
+  <% end %>
+  <div class="bg-white p-6 rounded-lg shadow mb-6">
+    <h2 class="text-2xl font-semibold text-indigo-600 mb-2">Hôtels</h2>
+    <p class="text-gray-700 mb-4">Trouvez et réservez des chambres confortables dans les meilleurs hôtels disponibles selon vos préférences.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <% if @hotels.present? %>
+        <% @hotels.each do |hotel| %>
+          <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2"><%= hotel.name %></h3>
+            <p class="text-gray-600 text-sm mb-4"><%= truncate(hotel.description, length: 100) %></p>
+            <% if hotel.images.attached? %>
+              <%= image_tag hotel.images.first.variant(resize_to_limit: [300, 200]), class: "rounded shadow" %>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p>Aucun hôtel pour l’instant.</p>
+      <% end %>
+    </div>
+    <div class="text-center mt-4">
+      <%= link_to "Explorez les hotels", customer_hotels_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+    </div>
+  </div>
+  <div class="bg-white p-6 rounded-lg shadow mb-6">
+    <h2 class="text-2xl font-semibold text-indigo-600 mb-2">Voyages organisés</h2>
+    <p class="text-gray-700 mb-4">Choisissez parmi une variété de circuits organisés vers les plus belles destinations.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <% if @trips.present? %>
+        <% @trips.each do |trip| %>
+          <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2"><%= trip.title %></h3>
+            <p class="text-gray-600 text-sm mb-2"><%= trip.destinationCity %></p>
+            <p class="text-gray-500 text-xs mb-4">Départ : <%= trip.departureDate.strftime("%d/%m/%Y") %></p>
+          </div>
+        <% end %>
+      <% else %>
+        <p>Aucun circuit ordanisé pour l’instant.</p>
+      <% end %>
+    </div>
+    <div class="text-center mt-4">
+      <div class="text-center mt-4">
+        <%= link_to "Explorez les voyages", customer_trips_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+      </div>
+    </div>
+  </div>
+  <!-- ✅ Section Voitures -->
+  <div class="bg-white p-6 rounded-lg shadow mb-6">
+    <h2 class="text-2xl font-semibold text-indigo-600 mb-2">Location de voitures</h2>
+    <p class="text-gray-700 mb-4">Louez une voiture adaptée à votre besoin pour explorer vos destinations en toute liberté.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <% if @cars.present? %>
+        <% @cars.each do |car| %>
+          <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2"><%= car.brand %> – <%= car.model %></h3>
+            <p class="text-gray-600 text-sm mb-4"><%= truncate(car.options, length: 100) %></p>
+          </div>
+        <% end %>
+      <% else %>
+        <p>Aucune voiture pour l’instant.</p>
+      <% end %>
+    </div>
+    <div class="text-center mt-4">
+      <%= link_to "Explorez les voitures", customer_cars_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+    </div>
+  </div>
+</main>

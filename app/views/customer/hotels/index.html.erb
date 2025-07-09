@@ -1,0 +1,26 @@
+<h1 class="text-3xl font-extrabold text-center text-gray-900 mb-10">
+  Nos Hôtels Disponibles
+</h1>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+  <% @hotels.each do |hotel| %>
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 p-5 flex flex-col justify-between">
+      <% if hotel.images.attached? %>
+        <div class="mb-4">
+          <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "rounded-md w-full object-cover" %>
+        </div>
+      <% end %>
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-indigo-700 mb-1">
+          <%= hotel.name %>
+        </h2>
+        <p class="text-sm text-gray-500 mb-1">
+          <%= hotel.stars %> étoile<%= "s" if hotel.stars > 1 %>
+        </p>
+        <p class="text-gray-700 text-sm">
+          <%= truncate(hotel.description, length: 100) %>
+        </p>
+      </div>
+      <%= link_to "Voir détails", customer_hotel_path(hotel), class: "inline-block mt-3 text-white bg-indigo-600 hover:bg-indigo-700 transition px-4 py-2 rounded-md text-sm text-center" %>
+    </div>
+  <% end %>
+</div>

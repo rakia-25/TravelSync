@@ -6,16 +6,52 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
   root "home#index"
-  # Defines the root path route ("/")
-  # root "posts#index"
+  
+  #dashboard des prestataires
   get "dashboard/provider", to: "dashboards#provider", as: :dashboard_provider
+  
+  # Ressource provider unique par user
+  #permet de definir le profil du prestataire
   resource :provider, only: [:new, :create, :show, :edit, :update,:destroy]
-  resources :hotels do 
-    delete 'purge_image/:id', to: 'hotels#purge_image', as: :purge_image
-    resources :rooms
+ 
+  
+  # Routes publiques (client)
+    #namespace :customer do
+   # resources :reservations, only: [:index, :show, :edit, :update] do 
+    #  member do
+     #   patch :pay
+      #end
+    #end 
+  #end
+  namespace :customer do
+    resources :hotels, only: [:index, :show] do 
+      resources :rooms, only: [:index, :show] do
+        resources :bookings, only: [:new, :create]
+      end
+    end
+    resources :trips, only: [:index, :show] do
+      resources :bookings, only: [:new, :create]
+    end
+    resources :cars, only: [:index, :show] do
+      resources :bookings, only: [:new, :create]
+    end
+    resources :reservations, only: [:index, :show, :edit, :update] do 
+      member do
+        patch :pay
+      end
+    end 
+    get "/menu", to: "menu#index", as: :menu_customer
   end
-  resources :cars, only: [:new, :create, :edit, :update, :destroy, :show]
-  resources :cars
-  resources :trips, only: [:new, :create, :edit, :update, :destroy, :show]
+  
+  # Namespace prestataire (provider) pour creer les services(hotels-room,car,trip)
+  namespace :provider do
+    resources :hotels do 
+      delete 'purge_image/:id', to: 'hotels#purge_image', as: :purge_image
+      resources :rooms
+    end
+    resources :cars
+    resources :trips 
+    resources :reservations, only: [:index, :update]
+  end
   
 end
