@@ -1,8 +1,0 @@
-<h1 class="text-2xl font-bold"><%= @car.brand %> <%= @car.model %></h1>
-<p><strong>Type:</strong> <%= @car.name %></p>
-<p><strong>Prix:</strong> <%= @car.price %> FCFA</p>
-<p><strong>Options:</strong> <%= @car.options %></p>
-<p><strong>Disponible:</strong> <%= @car.available ? "Oui" : "Non" %></p>
-
-<%= link_to "Modifier", edit_car_path(@car), class: "text-yellow-500" %> |
-<%= link_to "Retour", dashboard_provider_path, class: "text-blue-500" %>

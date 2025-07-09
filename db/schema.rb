@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_05_192721) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_07_114014) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -85,6 +85,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_192721) do
     t.index ["user_id"], name: "index_providers_on_user_id"
   end
 
+  create_table "reservations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.string "status"
+    t.integer "nbre_person"
+    t.string "reservable_type", null: false
+    t.integer "reservable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reservable_type", "reservable_id"], name: "index_reservations_on_reservable"
+    t.index ["user_id"], name: "index_reservations_on_user_id"
+  end
+
   create_table "rooms", force: :cascade do |t|
     t.integer "hotel_id", null: false
     t.string "services"
@@ -135,6 +149,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_192721) do
   add_foreign_key "hotel_trips", "trips"
   add_foreign_key "hotels", "providers"
   add_foreign_key "providers", "users"
+  add_foreign_key "reservations", "users"
   add_foreign_key "rooms", "hotels"
   add_foreign_key "trips", "providers"
 end

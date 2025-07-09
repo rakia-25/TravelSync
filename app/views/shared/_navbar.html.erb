@@ -1,0 +1,25 @@
+<% if user_signed_in? && current_user.role == "customer" %>
+  <nav class="bg-white shadow mb-6">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <!-- Logo -->
+      <div class="text-2xl font-bold text-indigo-700">
+        TravelSync
+      </div>
+      <!-- Liens -->
+      <div class="space-x-4">
+        <%= link_to "Accueil", root_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
+        <%= link_to "Voyages", customer_trips_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
+        <%= link_to "Hôtels", customer_hotels_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
+        <%= link_to "Voitures", customer_cars_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
+        <%= link_to "Mes réservations", customer_reservations_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
+        <!-- Bonjour et déconnexion -->
+        <span class="text-gray-700">Bonjour, <%= current_user.first_name %></span>
+        <%= form_with url: destroy_user_session_path, method: :delete, class: "inline" do %>
+          <button type="submit" class="text-red-600 hover:text-red-800 font-semibold">
+            Déconnexion
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </nav>
+<% end %>

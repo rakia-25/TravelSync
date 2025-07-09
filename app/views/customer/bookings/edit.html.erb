@@ -1,0 +1,17 @@
+<h2 class="text-xl font-semibold mb-4">Modifier la réservation</h2>
+<%= form_with(model: [:users, @reservation], local: true) do |form| %>
+  <div class="mb-4">
+    <%= form.label :start_date, "Date de début" %>
+    <%= form.date_field :start_date, class: "form-control" %>
+  </div>
+  <div class="mb-4">
+    <%= form.label :end_date, "Date de fin" %>
+    <%= form.date_field :end_date, class: "form-control" %>
+  </div>
+  <%# Optionnel : permettre d'annuler %>
+  <div class="mb-4">
+    <%= form.label :status, "Statut" %>
+    <%= form.select :status, options_for_select([["En attente", "pending"], ["Annulée", "cancelled"]], @reservation.status), class: "form-control" %>
+  </div>
+  <%= form.submit "Enregistrer", class: "bg-blue-600 text-white px-4 py-2 rounded" %>
+<% end %>
