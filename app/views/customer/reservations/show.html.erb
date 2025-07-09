@@ -1,20 +1,54 @@
-<h1 class="text-xl font-bold mb-4">Détail de la Réservation</h1>
-<p><strong>Type :</strong> <%= @reservation.reservable_type %></p>
-<% unless @reservation.reservable_type == "Trip" %>
-  <p><strong>Date de début :</strong> <%= @reservation.start_date %></p>
-  <p><strong>Date de fin :</strong> <%= @reservation.end_date %></p>
-<% end %>
-<p><strong>Statut :</strong> <%= @reservation.status.capitalize %></p>
-<% if @reservable.is_a?(Room) %>
-  <h2 class="mt-4 font-semibold">Chambre : <%= @reservable.type_room %> (Hôtel : <%= @reservable.hotel.name %>)</h2>
-<% elsif @reservable.is_a?(Car) %>
-  <h2 class="mt-4 font-semibold">Voiture : <%= @reservable.model %></h2>
-<% elsif @reservable.is_a?(Trip) %>
-  <h2 class="mt-4 font-semibold">Voyage : <%= @reservable.title %></h2>
-<% end %>
-<% if @reservation.confirmed? %>
-  <%= link_to "Payer maintenant", pay_customer_reservation_path(@reservation), method: :patch, data: {turbo_method: :patch, confirm: "Confirmer le paiement ?" }, class: "btn btn-success" %>
-<% elsif @reservation.paid? %>
-  <span class="text-green-600 font-semibold">Payée</span>
-<% end %>
-<%= link_to "Retour à mes réservations", customer_reservations_path, class: "mt-4 inline-block text-blue-600 underline" %>
+<div class="container my-5 bg-white p-4 rounded shadow">
+  <h1 class="text-center text-primary fw-bold mb-4 fs-3">Détail de la Réservation</h1>
+
+  <ul class="list-group mb-4">
+    <li class="list-group-item">
+      <strong>Type :</strong> <%= @reservation.reservable_type %>
+    </li>
+
+    <% unless @reservation.reservable_type == "Trip" %>
+      <li class="list-group-item">
+        <strong>Date de début :</strong> <%= l @reservation.start_date %>
+      </li>
+      <li class="list-group-item">
+        <strong>Date de fin :</strong> <%= l @reservation.end_date %>
+      </li>
+    <% end %>
+
+    <li class="list-group-item">
+      <strong>Statut :</strong>
+      <% status_class = case @reservation.status
+        when "confirmed" then "badge bg-success"
+        when "pending" then "badge bg-warning text-dark"
+        when "canceled" then "badge bg-danger"
+        when "paid" then "badge bg-primary"
+        else "badge bg-secondary"
+      end %>
+      <span class="<%= status_class %>"><%= @reservation.status.capitalize %></span>
+    </li>
+  </ul>
+
+  <div class="mb-4">
+    <% if @reservable.is_a?(Room) %>
+      <h5 class="fw-semibold">Chambre :</h5>
+      <p><%= @reservable.type_room %> — Hôtel : <%= @reservable.hotel.name %></p>
+    <% elsif @reservable.is_a?(Car) %>
+      <h5 class="fw-semibold">Voiture :</h5>
+      <p><%= @reservable.model %> – <%= @reservable.brand %></p>
+    <% elsif @reservable.is_a?(Trip) %>
+      <h5 class="fw-semibold">Voyage :</h5>
+      <p><%= @reservable.title %> — <%= @reservable.destinationCity %></p>
+    <% end %>
+  </div>
+
+  <% if @reservation.confirmed? %>
+    <%= link_to "Payer maintenant", pay_customer_reservation_path(@reservation),
+      method: :patch,
+      data: { turbo_method: :patch, confirm: "Confirmer le paiement ?" },
+      class: "btn btn-success me-2" %>
+  <% elsif @reservation.paid? %>
+    <span class="badge bg-success fs-6">✔️ Réservation payée</span>
+  <% end %>
+
+  <%= link_to "Retour à mes réservations", customer_reservations_path, class: "btn btn-outline-primary ms-2" %>
+</div>

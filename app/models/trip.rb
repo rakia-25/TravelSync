@@ -3,6 +3,7 @@ class Trip < ApplicationRecord
   # has_many :hotel_trips
   # has_many :hotels, through: :hotel_trips
   has_many :reservations, as: :reservable, dependent: :destroy
+  has_many_attached :images
 
    validates :title, :theme, :program, :duration,
             :departureDate, :returnDate,

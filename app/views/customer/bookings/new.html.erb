@@ -1,47 +1,61 @@
-<h1 class="text-xl font-bold mb-4">
-  Réserver <%= @reservable.class.name == "Room" ? "une chambre" : @reservable.class.name.downcase %>
-</h1>
-<!-- Détails du reservable -->
-<div class="bg-gray-100 p-4 rounded mb-4">
-  <% if @reservable.is_a?(Room) %>
-    <p><strong>Chambre :</strong> <%= @reservable.type_room %> | <strong>Lits :</strong> <%= @reservable.beds %></p>
-    <p><strong>Hôtel :</strong> <%= @reservable.hotel.name %></p>
-  <% elsif @reservable.is_a?(Car) %>
-    <p><strong>Voiture :</strong> <%= @reservable.model %> - <%= @reservable.brand %></p>
-  <% elsif @reservable.is_a?(Trip) %>
-    <p><strong>Voyage :</strong> <%= @reservable.title %> — <%= @reservable.destinationCity %></p>
-  <% end %>
-</div>
-<% url = case @reservable
-  when Room
-    customer_hotel_room_bookings_path(@reservable.hotel, @reservable)
-  when Car
-    customer_car_bookings_path(@reservable)
-  when Trip
-    customer_trip_bookings_path(@reservable)
-  else
-    "#"
-  end %>
-<%= form_with(model: [@reservable, Reservation.new], url: url,local: true) do |form| %>
-  <% if @reservation && @reservation.errors.any? %>
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
-      <ul>
-        <% @reservation.errors.full_messages.each do |msg| %>
-          <li><%= msg %></li>
-        <% end %>
-      </ul>
+<br><br>
+<div class="container d-flex justify-content-center">
+  <div class="col-md-8 col-lg-6 bg-white p-4 rounded shadow">
+
+    <h1 class="fs-3 fw-bold mb-4 text-center">
+      Réserver <%= @reservable.class.name == "Room" ? "une chambre" : @reservable.class.name.downcase %>
+    </h1>
+
+    <!-- Détails du reservable -->
+    <div class="bg-light p-3 rounded mb-4 border">
+      <% if @reservable.is_a?(Room) %>
+        <p><strong>Chambre :</strong> <%= @reservable.type_room %> | <strong>Lits :</strong> <%= @reservable.beds %></p>
+        <p><strong>Hôtel :</strong> <%= @reservable.hotel.name %></p>
+      <% elsif @reservable.is_a?(Car) %>
+        <p><strong>Voiture :</strong> <%= @reservable.model %> - <%= @reservable.brand %></p>
+      <% elsif @reservable.is_a?(Trip) %>
+        <p><strong>Voyage :</strong> <%= @reservable.title %> — <%= @reservable.destinationCity %></p>
+      <% end %>
     </div>
-  <% end %>
-  <div class="mb-4">
-    <%= form.label :start_date, "Date de début", class: "block font-semibold" %>
-    <%= form.date_field :start_date, class: "border rounded px-2 py-1 w-full" %>
+
+    <% url = case @reservable
+      when Room
+        customer_hotel_room_bookings_path(@reservable.hotel, @reservable)
+      when Car
+        customer_car_bookings_path(@reservable)
+      when Trip
+        customer_trip_bookings_path(@reservable)
+      else
+        "#"
+      end %>
+
+    <%= form_with(model: [@reservable, Reservation.new], url: url, local: true) do |form| %>
+
+      <% if @reservation && @reservation.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% @reservation.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="mb-3">
+        <%= form.label :start_date, "Date de début", class: "form-label fw-semibold" %>
+        <%= form.date_field :start_date, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :end_date, "Date de fin", class: "form-label fw-semibold" %>
+        <%= form.date_field :end_date, class: "form-control" %>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <%= form.submit "Réserver", class: "btn btn-primary" %>
+        <%= link_to "Annuler", request.referer || root_path, class: "btn btn-outline-secondary" %>
+      </div>
+
+    <% end %>
   </div>
-  <div class="mb-4">
-    <%= form.label :end_date, "Date de fin", class: "block font-semibold" %>
-    <%= form.date_field :end_date, class: "border rounded px-2 py-1 w-full" %>
-  </div>
-  <div class="mt-4">
-    <%= form.submit "Réserver", class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
-    <%= link_to "Annuler", request.referer || root_path, class: "ml-4 text-gray-600 underline" %>
-  </div>
-<% end %>
+</div>

@@ -1,25 +1,70 @@
-<% if user_signed_in? && current_user.role == "customer" %>
-  <nav class="bg-white shadow mb-6">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <!-- Logo -->
-      <div class="text-2xl font-bold text-indigo-700">
-        TravelSync
+<div class="container-fluid bg-dark px-0">
+  <div class="row gx-0">
+      <div class="col-lg-3 bg-dark d-none d-lg-block">
+          <a href="/" class="navbar-brand w-100 h-100 m-0 p-0 d-flex align-items-center justify-content-center">
+              <h1 class="m-0 text-primary text-uppercase">Travel_Sync</h1>
+          </a>
       </div>
-      <!-- Liens -->
-      <div class="space-x-4">
-        <%= link_to "Accueil", root_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
-        <%= link_to "Voyages", customer_trips_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
-        <%= link_to "Hôtels", customer_hotels_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
-        <%= link_to "Voitures", customer_cars_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
-        <%= link_to "Mes réservations", customer_reservations_path, class: "text-gray-800 hover:text-indigo-600 font-semibold" %>
-        <!-- Bonjour et déconnexion -->
-        <span class="text-gray-700">Bonjour, <%= current_user.first_name %></span>
-        <%= form_with url: destroy_user_session_path, method: :delete, class: "inline" do %>
-          <button type="submit" class="text-red-600 hover:text-red-800 font-semibold">
-            Déconnexion
-          </button>
-        <% end %>
+      <div class="col-lg-9">
+          <div class="row gx-0 bg-white d-none d-lg-flex">
+              <div class="col-lg-7 px-5 text-start">
+                  <div class="h-100 d-inline-flex align-items-center py-2 me-4">
+                      <i class="fa fa-envelope text-primary me-2"></i>
+                      <p class="mb-0">travelsync@contact.com</p>
+                  </div>
+                  <div class="h-100 d-inline-flex align-items-center py-2">
+                      <i class="fa fa-phone-alt text-primary me-2"></i>
+                      <p class="mb-0">+227 87 35 37 99</p>
+                  </div>
+              </div>
+              <div class="col-lg-5 px-5 text-end">
+                  <div class="d-inline-flex align-items-center py-2">
+                      <a class="me-3" href="#"><i class="fab fa-facebook-f"></i></a>
+                      <a class="me-3" href="#"><i class="fab fa-twitter"></i></a>
+                      <a class="me-3" href="#"><i class="fab fa-linkedin-in"></i></a>
+                      <a class="me-3" href="#"><i class="fab fa-instagram"></i></a>
+                      <a class="" href="#"><i class="fab fa-youtube"></i></a>
+                  </div>
+              </div>
+          </div>
+          <nav class="navbar navbar-expand-lg bg-dark navbar-dark p-3 p-lg-0">
+              <a href="/" class="navbar-brand d-block d-lg-none">
+                  <h1 class="m-0 text-primary text-uppercase">Travel_Sync</h1>
+              </a>  
+              <% if user_signed_in? %>
+              <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                  <% if current_user.role == "customer" %>
+                    <div class="navbar-nav mr-auto py-0">
+                         <%= link_to "Accueil", root_path,class:"nav-item nav-link" %>
+                        <%= link_to "Hotels", customer_hotels_path,class:"nav-item nav-link" %>
+                         <%= link_to "Voyages", customer_trips_path,class:"nav-item nav-link" %>
+                          <%= link_to "Voitures", customer_cars_path,class:"nav-item nav-link" %>
+                          <%= link_to "Mes reservations", customer_reservations_path,class:"nav-item nav-link" %>
+                           
+                        
+                    </div>
+                  <% end %>
+                  <div></div>
+                  <div>
+                      <%= form_with url: destroy_user_session_path, method: :delete do %>
+                        <a href="/dashboard/provider"><h3 class="nav-item nav-link active">
+                        <%= current_user.first_name %></a>
+
+                        <button type="submit" class="btn btn-primary">Déconnexion</button>
+                  </div>
+              </div>
+              <% end %>
+              <% else %>
+                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <a href=""></a>
+                <div>
+                <a href="/users/sign_up" class="btn btn-primary">Inscription</a>
+                <a href="/users/sign_in" class="btn btn-primary">Connexion</a>
+                </div>
+                </div>
+              <% end %>
+          </nav>
       </div>
-    </div>
-  </nav>
-<% end %>
+  </div>
+</div>
+

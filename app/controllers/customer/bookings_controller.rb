@@ -1,5 +1,6 @@
 class Customer::BookingsController < ApplicationController
-    before_action :authenticate_user!
+  layout "customer"  
+  before_action :authenticate_user!
     before_action :set_reservable
 
     def new

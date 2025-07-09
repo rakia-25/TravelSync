@@ -33,7 +33,7 @@ class Provider::CarsController < ApplicationController
 
   def destroy
     @car.destroy
-    redirect_to cars_path, notice: "Voiture supprimée avec succès."
+    redirect_to provider_cars_path, notice: "Voiture supprimée avec succès."
   end
 
   private

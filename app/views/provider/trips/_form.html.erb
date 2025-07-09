@@ -1,48 +1,68 @@
-<% if trip.errors.any? %>
-  <div class="bg-red-100 text-red-700 p-4 rounded-md mb-4">
-    <h2><%= pluralize(trip.errors.count, "erreur") %> empêchent la création du voyage :</h2>
-    <ul class="list-disc pl-5">
-      <% trip.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
+<div class="container py-4">
+  <% if trip.errors.any? %>
+    <div class="alert alert-danger">
+      <h5><%= pluralize(trip.errors.count, "erreur") %> empêchent la création du voyage :</h5>
+      <ul class="mb-0">
+        <% trip.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
+    <h2 class="text-center mb-4">
+      <%= action_name == 'new' ? 'Nouveau circuit' : 'Modifier le circuit' %>
+    </h2>
+
+    <%= form_with model: trip, url: trip.new_record? ? provider_trips_path : provider_trip_path(trip), method: trip.new_record? ? :post : :patch, local: true do |f| %>
+      <div class="mb-3">
+        <%= f.label :title, "Titre", class: "form-label" %>
+        <%= f.text_field :title, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :theme, "Thème", class: "form-label" %>
+        <%= f.select :theme, ['Culturel', 'Humanitaire', 'Professionnel', 'Loisir'], {}, class: "form-select" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :program, "Programme jour par jour", class: "form-label" %>
+        <%= f.text_area :program, rows: 6, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :duration, "Durée (en jours)", class: "form-label" %>
+        <%= f.number_field :duration, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :departureDate, "Date de départ", class: "form-label" %>
+        <%= f.date_select :departureDate, { order: [:day, :month, :year] }, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :returnDate, "Date de retour", class: "form-label" %>
+        <%= f.date_select :returnDate, { order: [:day, :month, :year] }, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :departureCity, "Ville de départ", class: "form-label" %>
+        <%= f.text_field :departureCity, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :destinationCity, "Ville de destination", class: "form-label" %>
+        <%= f.text_field :destinationCity, class: "form-control" %>
+      </div>
+
+      <div class="d-grid mt-4">
+        <%= f.submit trip.new_record? ? "Créer le circuit" : "Mettre à jour", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+
+    <div class="d-grid mt-4">
+      <%= link_to "Retour", dashboard_provider_path, class: "btn btn-outline-secondary" %>
+    </div>
   </div>
-<% end %>
-<h1><%= action_name == 'new' ? 'Nouveau circuit' : 'Modifier le circuit' %></h1>
-<%= form_with model: trip,url:provider_trips_path, local: true do |f| %>
-  <div>
-    <%= f.label :title %><br>
-    <%= f.text_field :title %>
-  </div>
-  <div>
-    <%= f.label :theme %><br>
-    <%= f.select :theme, ['Culturel', 'Humanitaire', 'Professionnel', 'Loisir'] %>
-  </div>
-  <div>
-    <%= f.label :program, "Programme jour par jour" %><br>
-    <%= f.text_area :program , rows: 6 %>
-  </div>
-  <div>
-    <%= f.label :duration, "Durée (en jours)" %><br>
-    <%= f.number_field :duration %>
-  </div>
-  <div>
-    <%= f.label :departureDate %><br>
-    <%= f.date_select  :departureDate %>
-  </div>
-  <div>
-    <%= f.label :returnDate %><br>
-    <%= f.date_select :returnDate %>
-  </div>
-  <div>
-    <%= f.label :departureCity %><br>
-    <%= f.text_field :departureCity %>
-  </div>
-  <div>
-    <%= f.label :destinationCity %><br>
-    <%= f.text_field :destinationCity %>
-  </div>
-  <%= f.submit %>
-<% end %>
-<br>
-<%= link_to "Retour", dashboard_provider_path %>
+</div>
