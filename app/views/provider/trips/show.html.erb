@@ -1,8 +1,26 @@
-<h1><%= @trip.title %></h1>
-<p><strong>Thème :</strong> <%= @trip.theme %></p>
-<p><strong>Programme :</strong> <%= simple_format(@trip.program) %></p>
-<p><strong>Durée :</strong> <%= @trip.duration %> jours</p>
-<p><strong>Départ :</strong> <%= @trip.departureCity %> – le <%= @trip.departureDate.strftime("%d/%m/%Y") %></p>
-<p><strong>Destination :</strong> <%= @trip.destinationCity %> – retour le <%= @trip.returnDate.strftime("%d/%m/%Y") %></p>
-<%= link_to "Modifier", edit_provider_trip_path(@trip) %> |
-<%= link_to "Retour à la liste", dashboard_provider_path %>
+<div class="container py-5">
+
+  <div class="card shadow p-4 mx-auto" style="max-width: 800px;">
+    <h1 class="text-center mb-4 fw-bold fs-3"><%= @trip.title %></h1>
+
+    <div class="mb-3">
+      <p><strong>Thème :</strong> <%= @trip.theme %></p>
+      <p><strong>Programme :</strong> <%= simple_format(@trip.program) %></p>
+      <p><strong>Durée :</strong> <%= @trip.duration %> jours</p>
+      <p>
+        <strong>Départ :</strong>
+        <%= @trip.departureCity %> – le <%= @trip.departureDate.strftime("%d/%m/%Y") if @trip.departureDate %>
+      </p>
+      <p>
+        <strong>Destination :</strong>
+        <%= @trip.destinationCity %> – retour le <%= @trip.returnDate.strftime("%d/%m/%Y") if @trip.returnDate %>
+      </p>
+    </div>
+
+    <div class="d-flex justify-content-center gap-3 mt-4">
+      <%= link_to "Modifier", edit_provider_trip_path(@trip), class: "btn btn-warning" %>
+      <%= link_to "Retour à la liste", dashboard_provider_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+</div>

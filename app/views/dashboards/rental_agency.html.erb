@@ -1,34 +1,42 @@
-<h1>Bienvenue dans votre espace agence de location</h1>
-<% if user_signed_in? %>
-  <%= form_with url: destroy_user_session_path, method: :delete do %>
-    <button type="submit"
-              class="bg-red-600 text-white py-2 px-6 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200">
-      Déconnexion
-    </button>
+<div class="container py-5">
+  <h1 class="text-center mb-4 fw-bold fs-3">Bienvenue dans votre espace Agence de Location</h1>
+
+  <div class="mb-3 text-muted text-center">
+    <p><strong>Prestataire :</strong> <%= @provider.type_provider %></p>
+    <p><strong>Entreprise  :</strong> <%= @provider.business  %></p>
+    <p><strong>Adresse :</strong> <%= @provider.address %></p>
+    <p><strong>Telephone :</strong> <%= @current_user.phone %></p>
+  </div>
+
+  <div class="text-center mb-4">
+    <%= link_to "Ajouter une voiture", new_provider_car_path, class: "btn btn-primary" %>
+  </div>
+
+  <h2 class="fs-4 fw-semibold mb-0">Liste des voitures</h2>
+  <br>
+  
+  <% if @cars.any? %>
+    <div class="row g-4">
+      <% @cars.each do |car| %>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title"><%= car.brand %> <%= car.model %></h5>
+              <p class="card-text text-muted"><strong>Prix :</strong> <%= number_with_delimiter(car.price) %> FCFA</p>
+
+              <div class="d-flex gap-2 mt-3">
+                <%= link_to "Voir", provider_car_path(car), class: "btn btn-sm btn-info" %>
+                <%= link_to "Modifier", edit_provider_car_path(car), class: "btn btn-sm btn-warning" %>
+                <%= form_with url: provider_car_path(car), method: :delete, class: "d-inline" do %>
+                  <%= button_tag "Supprimer", class: "btn btn-sm btn-danger", data: { confirm: "Supprimer cette voiture ?" } %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted fst-italic">Aucune voiture enregistrée pour le moment.</p>
   <% end %>
-<% end %>
-<p class="mb-2 text-gray-600">
-  <h2>Vos Informations : </h2>
-  Prestataire : <strong><%= @provider.type_provider %></strong><br>
-  Entreprise : <strong><%= @provider.business %></strong><br>
-  Adresse : <strong><%= @provider.address %></strong> <br>
-  Telephone: <strong><%= @current_user.phone %></strong><br>
-</p>
-<h1 class="text-2xl font-bold">Liste des voitures</h1>
-<%= link_to "Nouvelle voiture", new_provider_car_path, class: "btn bg-blue-500 text-white px-4 py-2" %>
-<ul class="mt-4 space-y-4">
-  <% @cars.each do |car| %>
-    <li class="border p-4 rounded shadow">
-      <strong><%= car.brand %> <%= car.model %></strong> - <%= car.price %> FCFA
-      <div class="mt-2">
-        <%= link_to "Voir", provider_car_path(car), class: "text-blue-500" %> |
-        <%= link_to "Modifier", edit_provider_car_path(car), class: "text-yellow-500" %> |
-        <%= form_with url: provider_car_path(car), method: :delete do %>
-          <button type="submit">
-            supprimer
-          </button>
-        <% end %>
-      </div>
-    </li>
-  <% end %>
-</ul>
+</div>

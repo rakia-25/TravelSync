@@ -1,27 +1,55 @@
-<%= form_with(model: [@hotel, @room], local: true) do |form| %>
-  <div class="mb-3">
-    <%= form.label :type_room %>
-    <%= form.text_field :type_room, class: "form-control" %>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow p-4 w-100" style="max-width: 600px;">
+    <h2 class="text-center mb-4"><%= @room.new_record? ? "Ajouter une chambre" : "Modifier la chambre" %></h2>
+
+    <%= form_with(model: [ :provider, @hotel, @room ], local: true, html: { multipart: true }) do |form| %>
+
+      <% if @room.errors.any? %>
+        <div class="alert alert-danger">
+          <h5><%= pluralize(@room.errors.count, "erreur") %> empêchent la sauvegarde :</h5>
+          <ul>
+            <% @room.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="mb-3">
+        <%= form.label :type_room, "Type de chambre", class: "form-label" %>
+        <%= form.text_field :type_room, class: "form-control", placeholder: "Ex: Suite, Simple, Double..." %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :price, "Prix", class: "form-label" %>
+        <%= form.number_field :price, step: 0.01, class: "form-control", placeholder: "Prix en FCFA ou €" %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :beds, "Nombre de lits", class: "form-label" %>
+        <%= form.number_field :beds, min: 1, class: "form-control", placeholder: "Ex: 1, 2, 3..." %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :services, "Services", class: "form-label" %>
+        <%= form.text_field :services, class: "form-control", placeholder: "Ex: WiFi, Clim, TV, Douche..." %>
+      </div>
+
+      <div class="form-check mb-3">
+        <%= form.check_box :available, class: "form-check-input", id: "room_available" %>
+        <%= form.label :available, "Disponible ?", class: "form-check-label", for: "room_available" %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :images, "Photos de la chambre", class: "form-label" %>
+        <%= form.file_field :images, multiple: true, class: "form-control" %>
+      </div>
+
+      <div class="d-grid">
+        <%= form.submit(@room.new_record? ? "Créer la chambre" : "Mettre à jour", class: "btn btn-primary btn-block") %>
+      </div>
+    <% end %>
+    <br>
+    <%= link_to "Retour à l'hôtel", provider_hotel_path(@hotel), class: "btn btn-outline-secondary" %>
   </div>
-  <div class="mb-3">
-    <%= form.label :price %>
-    <%= form.number_field :price, step: 0.01, class: "form-control" %>
-  </div>
-  <div class="mb-4">
-    <%= form.label :beds, "Nombre de lits" %>
-    <%= form.number_field :beds, min: 1, class: "form-control" %>
-  </div>
-  <div class="mb-3">
-    <%= form.label :services %>
-    <%= form.text_field :services, class: "form-control" %>
-  </div>
-  <div class="mb-3">
-    <%= form.label :available %>
-    <%= form.check_box :available %>
-  </div>
-  <div class="mb-3">
-    <%= form.label :images %>
-    <%= form.file_field :images, multiple: true, class: "form-control" %>
-  </div>
-  <%= form.submit class: "btn btn-primary" %>
-<% end %>
+</div>

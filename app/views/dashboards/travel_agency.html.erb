@@ -1,48 +1,59 @@
-<h1>Bienvenue dans votre espace agence de voyage</h1>
-<% if user_signed_in? %>
-  <%= form_with url: destroy_user_session_path, method: :delete do %>
-    <button type="submit"
-              class="bg-red-600 text-white py-2 px-6 rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200">
-      Déconnexion
-    </button>
-  <% end %>
-<% end %>
-<p class="mb-2 text-gray-600">
-  <h2>Vos Informations : </h2>
-  Prestataire : <strong><%= @provider.type_provider %></strong><br>
-  Entreprise : <strong><%= @provider.business %></strong><br>
-  Adresse : <strong><%= @provider.address %></strong> <br>
-  Telephone: <strong><%= @current_user.phone %></strong><br>
-</p>
-<%= link_to "Creer un Nouveau circuit", new_provider_trip_path %>
-<h1>Liste des circuits</h1>
-<table>
-  <thead>
-    <tr>
-      <th>Titre</th>
-      <th>Thème</th>
-      <th>Durée</th>
-      <th>Départ</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @trips.each do |trip| %>
-      <tr>
-        <td><%= trip.title %></td>
-        <td><%= trip.theme %></td>
-        <td><%= trip.duration %> jours</td>
-        <td><%= trip.departureDate.strftime("%d/%m/%Y") if trip.departureDate %></td>
-        <td>
-          <%= link_to "Voir", provider_trip_path(trip) %> |
-          <%= link_to "Modifier", edit_provider_trip_path(trip) %>
-          <%= form_with url: provider_trip_path(trip), method: :delete do %>
-            <button type="submit">
-              supprimer
-            </button>
+<div class="container-fluid page-header mb-5 p-0" style="background-image: url('/img/voyage.jpeg'); background-size: cover; background-position: center; height: 50vh;">
+  <div class="container-fluid page-header-inner h-100 d-flex align-items-center">
+    <div class="container text-center text-white">
+      <h3 class="display-5 fw-bold mb-3 text-white">Bienvenue dans votre espace Agence de Voyage</h3>
+
+      <div class="text-white">
+        <p><strong>Prestataire :</strong> <%= @provider.type_provider %></p>
+        <p><strong>Entreprise :</strong> <%= @provider.business %></p>
+        <p><strong>Adresse :</strong> <%= @provider.address %></p>
+        <p><strong>Téléphone :</strong> <%= current_user.phone %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="text-center mb-4">
+    <%= link_to "Ajouter un circuit", new_provider_trip_path, class: "btn btn-success" %>
+  </div>
+
+  <h2 class="mb-3 fw-semibold">Liste des circuits</h2>
+
+  <% if @trips.any? %>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Titre</th>
+            <th>Thème</th>
+            <th>Durée</th>
+            <th>Date de départ</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @trips.each do |trip| %>
+            <tr>
+              <td><%= trip.title %></td>
+              <td><%= trip.theme %></td>
+              <td><%= trip.duration %> jours</td>
+              <td><%= trip.departureDate&.strftime("%d/%m/%Y") || "-" %></td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <%= link_to "Voir", provider_trip_path(trip), class: "btn btn-sm btn-info" %>
+                  <%= link_to "Modifier", edit_provider_trip_path(trip), class: "btn btn-sm btn-warning" %>
+                  <%= form_with url: provider_trip_path(trip), method: :delete, data: { confirm: "Supprimer ce circuit ?" }, class: "d-inline" do %>
+                    <%= submit_tag "Supprimer", class: "btn btn-sm btn-danger" %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
           <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="text-muted fst-italic">Aucun circuit n’est encore enregistré.</p>
+  <% end %>
+
+</div>

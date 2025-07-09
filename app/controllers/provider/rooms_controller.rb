@@ -25,7 +25,7 @@ class Provider::RoomsController < ApplicationController
     end
     def destroy
         @room.destroy
-        redirect_to @hotel, notice: "Chambre supprimée."
+        redirect_to provider_hotel_path(@hotel), notice: "Chambre supprimée."
     end
 
     private

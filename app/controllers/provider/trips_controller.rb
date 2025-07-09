@@ -34,7 +34,7 @@ class Provider::TripsController < ApplicationController
 
   def destroy
     @trip.destroy
-    redirect_to trips_path
+    redirect_to provider_trips_path
   end
 
   private

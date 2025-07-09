@@ -1,10 +1,1 @@
-<%= form_with model: @car, url: provider_cars_path, local: true do |form| %>
-  <%= form.text_field :brand,  placeholder: "Marque" %>
-  <%= form.text_field :model,  placeholder: "Modèle" %>
-  <%= form.text_field :name,  placeholder: "name" %>
-  <%= form.number_field :price, step: 1000,  placeholder: "Prix" %>
-  <%= form.text_field :options,  placeholder: "Options" %>
-  <%= form.check_box :available %> Disponible ?
-  <br>
-  <%= form.submit "Crée", class: "bg-green-500 text-white px-4 py-2 rounded" %>
-<% end %>
+<%= render 'form', car: @car %>

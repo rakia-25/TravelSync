@@ -1,47 +1,85 @@
-<%= form_with(model: hotel, local: true) do |f| %>
-  <% if @hotel.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@hotel.errors.count, "erreur") %> empêchent la sauvegarde :</h2>
-      <ul>
-        <% @hotel.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-  <p>
-    <%= f.label :name, "Nom de l'hôtel" %><br>
-    <%= f.text_field :name %>
-  </p>
-  <p>
-    <%= f.label :description %><br>
-    <%= f.text_area :description %>
-  </p>
-  <p>
-    <%= f.label :stars, "Nombre d'étoiles" %><br>
-    <%= f.number_field :stars %>
-  </p>
-  <p>
-    <%= f.label :address, "Adresse" %><br>
-    <%= f.text_field :address %>
-  </p>
-  <p>
-    <%= f.label :city, "Ville" %><br>
-    <%= f.text_field :city %>
-  </p>
-  <p>
-    <%= f.label :gps, "Coordonnées GPS" %><br>
-    <%= f.text_field :gps %>
-  </p>
-  <p>
-    <%= f.label :service, "Services" %><br>
-    <%= f.text_field :service %>
-  </p>
-  <p>
-    <%= f.label :images, "Photos de l'hôtel" %><br>
-    <%= f.file_field :images, multiple: true, direct_upload: true %>
-  </p>
-  <p>
-    <%= f.submit %>
-  </p>
-<% end %>
+<br><br>
+<h2 class="text-center mb-4">
+  <%= action_name == 'new' ? 'Nouveau hôtel' : 'Modifier hôtel' %>
+</h2>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="col-md-8 col-lg-6">
+    <%= form_with(model: hotel, url: hotel.new_record? ? provider_hotels_path : provider_hotel_path(hotel), local: true, method: hotel.new_record? ? :post : :patch, html: { multipart: true }) do |f| %>
+
+      <% if @hotel.errors.any? %>
+        <div class="alert alert-danger">
+          <h5><%= pluralize(@hotel.errors.count, "erreur") %> empêchent la sauvegarde :</h5>
+          <ul>
+            <% @hotel.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="row g-3">
+
+        <div class="col-12">
+          <div class="form-floating">
+            <%= f.text_field :name, class: "form-control", id: "hotel_name", placeholder: "Nom de l'hôtel" %>
+            <%= f.label :name, "Nom de l'hôtel", for: "hotel_name" %>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="form-floating">
+            <%= f.text_area :description, class: "form-control", id: "hotel_description", placeholder: "Description", style: "height: 120px" %>
+            <%= f.label :description, "Description", for: "hotel_description" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-floating">
+            <%= f.number_field :stars, class: "form-control", id: "hotel_stars", placeholder: "Nombre d'étoiles" %>
+            <%= f.label :stars, "Nombre d'étoiles", for: "hotel_stars" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-floating">
+            <%= f.text_field :service, class: "form-control", id: "hotel_service", placeholder: "Services" %>
+            <%= f.label :service, "Services", for: "hotel_service" %>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="form-floating">
+            <%= f.text_field :address, class: "form-control", id: "hotel_address", placeholder: "Adresse" %>
+            <%= f.label :address, "Adresse", for: "hotel_address" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-floating">
+            <%= f.text_field :city, class: "form-control", id: "hotel_city", placeholder: "Ville" %>
+            <%= f.label :city, "Ville", for: "hotel_city" %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-floating">
+            <%= f.text_field :gps, class: "form-control", id: "hotel_gps", placeholder: "Coordonnées GPS" %>
+            <%= f.label :gps, "Coordonnées GPS", for: "hotel_gps" %>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Photos de l'hôtel</label>
+          <%= f.file_field :images, multiple: true, direct_upload: true, class: "form-control" %>
+        </div>
+
+        <div class="col-12">
+          <%= f.submit "Enregistrer", class: "btn btn-success w-100 py-3" %>
+        </div>
+        <div class="col-12">
+          <%= link_to 'Retour à la liste des hôtels', dashboard_provider_path, class: "btn btn-outline-secondary w-100 py-3" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

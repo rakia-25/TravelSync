@@ -1,26 +1,31 @@
-<h1 class="text-3xl font-extrabold text-center text-gray-900 mb-10">
-  Nos Hôtels Disponibles
-</h1>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
-  <% @hotels.each do |hotel| %>
-    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 p-5 flex flex-col justify-between">
-      <% if hotel.images.attached? %>
-        <div class="mb-4">
-          <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "rounded-md w-full object-cover" %>
+<div class="container-xxl py-5">
+  <div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+      <h1 class="mb-5 text-uppercase text-primary">Nos Hôtels Disponibles</h1>
+    </div>
+
+    <div class="row g-4">
+      <% @hotels.each do |hotel| %>
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+          <div class="room-item shadow rounded overflow-hidden">
+            <div class="position-relative">
+              <% if hotel.images.attached? %>
+                <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "img-fluid w-100" %>
+              <% end %>
+              <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
+                <%= hotel.stars %> étoile<%= "s" if hotel.stars > 1 %>
+              </small>
+            </div>
+            <div class="p-4 mt-2">
+              <h5 class="mb-2 text-primary fw-bold"><%= hotel.name %></h5>
+              <p class="text-body mb-3"><%= truncate(hotel.description, length: 100) %></p>
+              <div class="d-flex justify-content-between">
+                <%= link_to "Voir détails", customer_hotel_path(hotel), class: "btn btn-sm btn-primary rounded py-2 px-4" %>
+              </div>
+            </div>
+          </div>
         </div>
       <% end %>
-      <div class="mb-4">
-        <h2 class="text-xl font-bold text-indigo-700 mb-1">
-          <%= hotel.name %>
-        </h2>
-        <p class="text-sm text-gray-500 mb-1">
-          <%= hotel.stars %> étoile<%= "s" if hotel.stars > 1 %>
-        </p>
-        <p class="text-gray-700 text-sm">
-          <%= truncate(hotel.description, length: 100) %>
-        </p>
-      </div>
-      <%= link_to "Voir détails", customer_hotel_path(hotel), class: "inline-block mt-3 text-white bg-indigo-600 hover:bg-indigo-700 transition px-4 py-2 rounded-md text-sm text-center" %>
     </div>
-  <% end %>
+  </div>
 </div>
