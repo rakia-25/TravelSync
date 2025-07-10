@@ -1,25 +1,30 @@
-<h1 class="text-3xl font-extrabold text-center text-gray-900 mb-8">
-  Liste des voitures disponibles
-</h1>
+<h1 class="text-center fw-bold text-primary mb-5">Liste des voitures disponibles</h1>
 <% if @cars.any? %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 max-w-7xl mx-auto">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 px-3 mx-auto" style="max-width: 1140px;">
     <% @cars.each do |car| %>
-      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">
-          <%= car.brand %> <span class="text-indigo-600"><%= car.model %></span>
-        </h3>
-        <p class="text-sm text-gray-600 mb-4">
-          Prix par jour : <span class="font-semibold text-gray-900"><%= number_to_currency(car.price, unit: "FCFA ") %></span>
-        </p>
-        <div class="flex space-x-3">
-          <%= link_to "Voir détails", customer_car_path(car), class: "px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" %>
-          <%= link_to "Réserver", new_customer_car_booking_path(car), class: "px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" %>
+      <div class="col">
+        <div class="card h-100 shadow-sm border-0 rounded">
+          <% if car.images.attached? %>
+            <%= image_tag car.images.first.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed" %>
+          <% end %>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-primary fw-semibold">
+              <%= car.brand %> <span class="text-secondary"><%= car.model %></span>
+            </h5>
+            <p class="card-text mb-4 text-muted">
+              Prix par jour : <span class="fw-bold text-dark"><%= number_to_currency(car.price, unit: "FCFA ") %></span>
+            </p>
+            <div class="mt-auto d-flex gap-2">
+              <%= link_to "Voir détails", customer_car_path(car), class: "btn btn-outline-primary flex-grow-1" %>
+              <%= link_to "Réserver", new_customer_car_booking_path(car), class: "btn btn-primary flex-grow-1" %>
+            </div>
+          </div>
         </div>
       </div>
     <% end %>
   </div>
 <% else %>
-  <p class="text-center text-gray-500 italic mt-10">
+  <p class="text-center text-muted fst-italic mt-5">
     Aucune voiture disponible pour le moment.
   </p>
 <% end %>

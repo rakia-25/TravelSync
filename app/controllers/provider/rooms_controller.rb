@@ -9,7 +9,7 @@ class Provider::RoomsController < ApplicationController
         if @room.save
             redirect_to provider_hotel_path(@hotel), notice: "Chambre ajoutée avec succès."
         else
-            render :new
+            render :new, status: :unprocessable_entity
         end
     end
 

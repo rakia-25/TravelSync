@@ -16,7 +16,7 @@ class Provider::CarsController < ApplicationController
     if @car.save
       redirect_to dashboard_provider_path, notice: "Voiture créée avec succès."
     else
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 

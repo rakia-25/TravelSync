@@ -1,39 +1,35 @@
 <div class="container py-5 d-flex justify-content-center">
   <div class="card shadow p-4 w-100" style="max-width: 600px;">
     <h2 class="text-center mb-4 fw-bold">Nouvelle voiture</h2>
-
     <%= form_with(model: car, url: car.new_record? ? provider_cars_path : provider_car_path(car), local: true, method: car.new_record? ? :post : :patch, html: { multipart: true }) do |form| %>
-
       <div class="mb-3">
         <%= form.label :brand, "Marque", class: "form-label" %>
         <%= form.text_field :brand, placeholder: "Toyota, Renault...", class: "form-control" %>
       </div>
-
       <div class="mb-3">
         <%= form.label :model, "Modèle", class: "form-label" %>
         <%= form.text_field :model, placeholder: "Corolla, Clio...", class: "form-control" %>
       </div>
-
       <div class="mb-3">
         <%= form.label :name, "Type", class: "form-label" %>
         <%= form.text_field :name, placeholder: "Nom visible sur la plateforme", class: "form-control" %>
       </div>
-
       <div class="mb-3">
         <%= form.label :price, "Prix (FCFA)", class: "form-label" %>
         <%= form.number_field :price, step: 1000, placeholder: "Ex: 15000", class: "form-control" %>
       </div>
-
       <div class="mb-3">
         <%= form.label :options, "Options", class: "form-label" %>
         <%= form.text_field :options, placeholder: "Climatisation, Wi-Fi...", class: "form-control" %>
       </div>
-
       <div class="form-check mb-4">
         <%= form.check_box :available, class: "form-check-input", id: "car_available" %>
         <%= form.label :available, "Disponible ?", class: "form-check-label", for: "car_available" %>
       </div>
-
+      <div class="col-12">
+        <label class="form-label">Photos de la voiture</label>
+        <%= form.file_field :images, multiple: true, direct_upload: true, class: "form-control" %>
+      </div>
       <div class="d-grid">
         <%= form.submit "Enregistrer", class: "btn btn-success" %>
       </div>

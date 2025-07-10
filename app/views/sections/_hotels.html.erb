@@ -1,0 +1,38 @@
+<section id="hotels" class="container-xxl py-5">
+  <div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+      <h6 class="section-title text-center text-primary text-uppercase">Nos Hôtels</h6>
+      <h1 class="mb-5">Découvrez nos <span class="text-primary text-uppercase">Hôtels</span></h1>
+    </div>
+    <div class="row g-4">
+      <% if @hotels.present? %>
+        <% @hotels.each_with_index do |hotel, index| %>
+          <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<%= (index * 0.2).round(1) %>s">
+            <div class="room-item shadow rounded overflow-hidden">
+              <div class="position-relative">
+                <% if hotel.images.attached? %>
+                  <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed", alt: hotel.name %>
+                <% else %>
+                  <%= image_tag "default-hotel.jpg", class: "img-fluid w-100", alt: "Image par défaut hôtel" %>
+                <% end %>
+                <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
+                  <%= hotel.stars %> ★
+                </small>
+              </div>
+              <div class="p-4 mt-2">
+                <h5 class="mb-2 text-primary fw-bold"><%= hotel.name %></h5>
+                <p class="text-body mb-3"><%= truncate(hotel.description, length: 100) %></p>
+                <p class="text-muted mb-2"><i class="fa fa-map-marker-alt text-primary me-2"></i><%= hotel.city %></p>
+                <div class="d-flex justify-content-between">
+                  <%= link_to "Voir détails", customer_hotel_path(hotel), class: "btn btn-sm btn-primary rounded py-2 px-4" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-center">Aucun hôtel disponible pour le moment.</p>
+      <% end %>
+    </div>
+  </div>
+</section>

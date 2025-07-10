@@ -1,0 +1,80 @@
+<!-- Footer -->
+<div class="container-fluid bg-dark text-light footer wow fadeIn" data-wow-delay="0.1s">
+  <div class="container pb-5">
+    <div class="row g-5">
+      <!-- Logo & Description -->
+      <div class="col-md-6 col-lg-4">
+        <div class="bg-primary rounded p-4">
+          <a href="/">
+            <h1 class="text-white text-uppercase mb-3">Travel_Sync</h1>
+          </a>
+          <p class="text-white mb-0">
+            Bienvenue sur TravelSync, votre plateforme de gestion de voyages, hôtels et voitures.
+          </p>
+        </div>
+      </div>
+      <!-- Contact -->
+      <div class="col-md-6 col-lg-3">
+        <h6 class="section-title text-start text-primary text-uppercase mb-4">Contact</h6>
+        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+227 90 00 00 00</p>
+        <p class="mb-2"><i class="fa fa-envelope me-3"></i>contact@travelsync.fr</p>
+        <div class="d-flex pt-2">
+          <a class="btn btn-outline-light btn-social me-2" href="#"><i class="fab fa-twitter"></i></a>
+          <a class="btn btn-outline-light btn-social me-2" href="#"><i class="fab fa-facebook-f"></i></a>
+          <a class="btn btn-outline-light btn-social me-2" href="#"><i class="fab fa-youtube"></i></a>
+          <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <!-- Liens dynamiques selon rôle -->
+      <div class="col-lg-5 col-md-12">
+        <div class="row gy-5 g-4">
+          <div class="col-md-6">
+            <h6 class="section-title text-start text-primary text-uppercase mb-4">Liens Utiles</h6>
+            <a class="btn btn-link p-0 d-block" href="#">À propos</a>
+            <a class="btn btn-link p-0 d-block" href="#">Contact</a>
+            <a class="btn btn-link p-0 d-block" href="#">Support</a>
+          </div>
+          <div class="col-md-6">
+            <h6 class="section-title text-start text-primary text-uppercase mb-4">Services</h6>
+            <% if user_signed_in? %>
+              <% if current_user.role == "customer" %>
+                <%= link_to "Mes Réservations", customer_reservations_path, class: "btn btn-link p-0 d-block" %>
+                <%= link_to "Mon Profil", edit_user_registration_path, class: "btn btn-link p-0 d-block" %>
+              <% elsif current_user.role == "provider" %>
+                <% case current_user.provider.type_provider %>
+                <% when "hotelier" %>
+                  <%= link_to "Mes Hôtels", dashboard_provider_path, class: "btn btn-link p-0 d-block" %>
+                <% when "travel_agency" %>
+                  <%= link_to "Mes Voyages", dashboard_provider_path, class: "btn btn-link p-0 d-block" %>
+                <% when "rental_agency" %>
+                  <%= link_to "Mes Voitures", dashboard_provider_path, class: "btn btn-link p-0 d-block" %>
+                <% end %>
+                <%= link_to "Réservations reçues", provider_reservations_path, class: "btn btn-link p-0 d-block" %>
+              <% end %>
+            <% else %>
+              <%= link_to "S'inscrire", new_user_registration_path, class: "btn btn-link p-0 d-block" %>
+              <%= link_to "Se connecter", new_user_session_path, class: "btn btn-link p-0 d-block" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Copyright -->
+  <div class="container">
+    <div class="copyright py-3 border-top border-secondary">
+      <div class="row">
+        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+          &copy; <a class="border-bottom" href="/">TravelSync</a>, Tous droits réservés.
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <div class="footer-menu">
+            <a href="#" class="text-light text-decoration-none me-3">Accueil</a>
+            <a href="#" class="text-light text-decoration-none me-3">Aide</a>
+            <a href="#" class="text-light text-decoration-none">FAQ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

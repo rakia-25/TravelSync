@@ -3,14 +3,13 @@
     <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
       <h1 class="mb-5 text-uppercase text-primary">Nos Hôtels Disponibles</h1>
     </div>
-
     <div class="row g-4">
       <% @hotels.each do |hotel| %>
         <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
           <div class="room-item shadow rounded overflow-hidden">
             <div class="position-relative">
               <% if hotel.images.attached? %>
-                <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "img-fluid w-100" %>
+                <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed" %>
               <% end %>
               <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
                 <%= hotel.stars %> étoile<%= "s" if hotel.stars > 1 %>
