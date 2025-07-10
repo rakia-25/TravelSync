@@ -32,8 +32,8 @@
 
               <!-- Période -->
               <td>
-                <%= l reservation.start_date %> →
-                <%= l reservation.end_date %>
+                <%= reservation.start_date.present? ? l(reservation.start_date) : "-" %> →
+                <%= reservation.end_date.present? ? l(reservation.end_date) : "-" %>
               </td>
 
               <!-- Statut -->

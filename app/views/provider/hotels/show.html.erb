@@ -27,8 +27,12 @@
       <% end %>
     </div>
   <% end %>
+  
   <!-- Titre des chambres -->
   <h2 class="text-center text-dark border-bottom pb-2 mb-4 fs-4 fw-semibold">Chambres disponibles</h2>
+  <div class="text-center mb-5">
+    <%= link_to "Ajouter une chambre", new_provider_hotel_room_path(@hotel), class: "btn btn-primary rounded-pill px-4 py-2" %>
+  </div>
   <% if @hotel.rooms.any? %>
     <div class="row g-4">
       <% @hotel.rooms.each do |room| %>
@@ -87,4 +91,7 @@
       Aucune chambre listée pour cet hôtel.
     </p>
   <% end %>
+
+  <hr class="my-5">
+  <%= link_to "Retour à la liste des hôtels", dashboard_provider_path, class: "btn btn-outline-primary" %>
 </div>

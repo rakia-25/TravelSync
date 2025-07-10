@@ -13,7 +13,7 @@
                 <% if car.images.attached? %>
                   <%= image_tag car.images.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed", alt: "#{car.brand} #{car.model}" %>
                 <% else %>
-                  <%= image_tag "/img/voyage.webp", class: "img-fluid w-100", alt: "Voiture par défaut" %>
+                  <%= image_tag "/img/voiture.jpeg", class: "img-fluid w-100", alt: "Voiture par défaut" %>
                 <% end %>
                 <% if car.price %>
                   <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
