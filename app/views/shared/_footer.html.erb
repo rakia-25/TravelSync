@@ -40,7 +40,7 @@
               <% if current_user.role == "customer" %>
                 <%= link_to "Mes Réservations", customer_reservations_path, class: "btn btn-link p-0 d-block" %>
                 <%= link_to "Mon Profil", edit_user_registration_path, class: "btn btn-link p-0 d-block" %>
-              <% elsif current_user.role == "provider" %>
+              <% elsif current_user.role == "provider" && current_user.provider.present? %>
                 <% case current_user.provider.type_provider %>
                 <% when "hotelier" %>
                   <%= link_to "Mes Hôtels", dashboard_provider_path, class: "btn btn-link p-0 d-block" %>
