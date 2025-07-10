@@ -3,14 +3,12 @@
   <h1 class="text-center text-primary fw-bold mb-4 fs-2">
     <%= @hotel.name %>
   </h1>
-
   <!-- Infos principales -->
   <div class="text-center text-muted mb-4">
     <p><strong class="text-dark">Ville :</strong> <%= @hotel.city %></p>
     <p><strong class="text-dark">Adresse :</strong> <%= @hotel.address %></p>
     <p><strong class="text-dark">Prestataire :</strong> <%= @hotel.provider.business %></p>
   </div>
-
   <!-- Galerie d'images -->
   <% if @hotel.images.attached? %>
     <div class="row g-3 mb-5">
@@ -21,10 +19,8 @@
       <% end %>
     </div>
   <% end %>
-
   <!-- Titre des chambres -->
   <h2 class="text-center text-dark border-bottom pb-2 mb-4 fs-4 fw-semibold">Chambres disponibles</h2>
-
   <% if @hotel.rooms.any? %>
     <div class="row g-4">
       <% @rooms.each do |room| %>
@@ -35,8 +31,8 @@
                 <h5 class="text-primary fw-bold mb-0"><%= room.type_room %></h5>
                 <span class="text-muted small"><%= room.beds %> lit(s)</span>
               </div>
-
               <p class="mb-2">
+                <strong>Services :</strong> <%=room.services %><br>
                 <strong>Prix :</strong> <%= number_to_currency(room.price, unit: "FCFA ") %><br>
                 <strong>Disponible :</strong>
                 <% if room.available %>
@@ -45,11 +41,10 @@
                   <span class="badge bg-danger">Non</span>
                 <% end %>
               </p>
-
               <% reservations = room.reservations.where.not(status: "canceled") %>
               <% if room.available? && reservations.any? %>
                 <div class="alert alert-warning small mt-3">
-                  <strong>📅 Réservée pour :</strong>
+                  <strong>Réservée pour :</strong>
                   <ul class="mb-0 ps-3">
                     <% reservations.each do |res| %>
                       <li>
@@ -64,7 +59,6 @@
                   </ul>
                 </div>
               <% end %>
-
               <% if room.available? && current_user.customer? %>
                 <div class="text-end mt-3">
                   <%= link_to "Réserver cette chambre", new_customer_hotel_room_booking_path(room.hotel, room),

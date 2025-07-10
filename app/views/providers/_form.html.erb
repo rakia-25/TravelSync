@@ -1,11 +1,7 @@
-<h2 class="text-center mb-4">Completer votre profil Prestataire</h2>
-
 <div class="d-flex justify-content-center align-items-center">
   <div class="col-md-6 col-lg-5">
     <div class="wow fadeInUp" data-wow-delay="0.2s">
-
       <%= form_with(model: provider, url: provider_path, local: true) do |form| %>
-
         <% if provider.errors.any? %>
           <div class="alert alert-danger">
             <h5 class="mb-2"><%= pluralize(provider.errors.count, "erreur") %> empêchent la sauvegarde :</h5>
@@ -16,16 +12,13 @@
             </ul>
           </div>
         <% end %>
-
         <div class="row g-3">
-
           <div class="col-12">
             <div class="form-floating">
               <%= form.text_field :business, class: "form-control", id: "business", placeholder: "Nom de l'entreprise" %>
               <%= form.label :business, "Nom de l'entreprise", for: "business" %>
             </div>
           </div>
-
           <div class="col-12">
             <div class="form-floating">
               <%= form.select :type_provider,
@@ -35,21 +28,17 @@
               <%= form.label :type_provider, "Type de prestataire", for: "type_provider" %>
             </div>
           </div>
-
           <div class="col-12">
             <div class="form-floating">
               <%= form.text_field :address, class: "form-control", id: "address", placeholder: "Adresse" %>
               <%= form.label :address, "Adresse", for: "address" %>
             </div>
           </div>
-
           <div class="col-12">
             <%= form.submit "Enregistrer", class: "btn btn-success w-100 py-3" %>
           </div>
-
         </div>
       <% end %>
-
     </div>
   </div>
 </div>

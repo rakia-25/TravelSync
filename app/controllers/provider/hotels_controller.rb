@@ -38,7 +38,7 @@ end
         def purge_image
             image = ActiveStorage::Attachment.find(params[:id])
             image.purge
-            redirect_back fallback_location: hotel_path(image.record), notice: "Image supprimée avec succès"
+            redirect_back fallback_location: provider_hotel_path(image.record), notice: "Image supprimée avec succès"
           end
         private
         def check_hotelier

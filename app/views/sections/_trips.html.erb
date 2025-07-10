@@ -1,0 +1,39 @@
+<section id="trips" class="container-xxl py-5">
+  <div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+      <h6 class="section-title text-center text-primary text-uppercase">Nos Circuits</h6>
+      <h1 class="mb-5">Découvrez nos <span class="text-primary text-uppercase">Voyages organisés</span></h1>
+    </div>
+    <div class="row g-4">
+      <% if @trips.present? %>
+        <% @trips.each_with_index do |trip, index| %>
+          <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<%= (index * 0.2).round(1) %>s">
+            <div class="room-item shadow rounded overflow-hidden">
+              <div class="position-relative">
+                <% if trip.images.attached? %>
+                  <%= image_tag trip.images.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed", alt: trip.title %>
+                <% else %>
+                  <%= image_tag "/img/voyage.jpeg", class: "img-fluid w-100", alt: "Image par défaut circuit" %>
+                <% end %>
+                <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
+                  <%= trip.duration %> jours
+                </small>
+              </div>
+              <div class="p-4 mt-2">
+                <h5 class="mb-1 text-primary"><%= trip.title %></h5>
+                <p class="mb-2 text-muted"><i class="fa fa-map-marker-alt me-2"></i><%= trip.departureCity %> → <%= trip.destinationCity %></p>
+                <p class="text-muted mb-2"><i class="fa fa-calendar-alt me-2"></i>Départ : <%= trip.departureDate.strftime("%d/%m/%Y") %></p>
+                <p class="text-muted"><i class="fa fa-calendar-check me-2"></i>Retour : <%= trip.returnDate.strftime("%d/%m/%Y") %></p>
+                <div class="d-flex justify-content-between mt-3">
+                  <%= link_to "Voir Détails", customer_trip_path(trip), class: "btn btn-sm btn-primary rounded py-2 px-4" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-center">Aucun circuit organisé pour l'instant.</p>
+      <% end %>
+    </div>
+  </div>
+</section>

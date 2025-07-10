@@ -1,70 +1,91 @@
 <div class="container-fluid bg-dark px-0">
   <div class="row gx-0">
-      <div class="col-lg-3 bg-dark d-none d-lg-block">
-          <a href="/" class="navbar-brand w-100 h-100 m-0 p-0 d-flex align-items-center justify-content-center">
-              <h1 class="m-0 text-primary text-uppercase">Travel_Sync</h1>
-          </a>
-      </div>
-      <div class="col-lg-9">
-          <div class="row gx-0 bg-white d-none d-lg-flex">
-              <div class="col-lg-7 px-5 text-start">
-                  <div class="h-100 d-inline-flex align-items-center py-2 me-4">
-                      <i class="fa fa-envelope text-primary me-2"></i>
-                      <p class="mb-0">travelsync@contact.com</p>
-                  </div>
-                  <div class="h-100 d-inline-flex align-items-center py-2">
-                      <i class="fa fa-phone-alt text-primary me-2"></i>
-                      <p class="mb-0">+227 87 35 37 99</p>
-                  </div>
-              </div>
-              <div class="col-lg-5 px-5 text-end">
-                  <div class="d-inline-flex align-items-center py-2">
-                      <a class="me-3" href="#"><i class="fab fa-facebook-f"></i></a>
-                      <a class="me-3" href="#"><i class="fab fa-twitter"></i></a>
-                      <a class="me-3" href="#"><i class="fab fa-linkedin-in"></i></a>
-                      <a class="me-3" href="#"><i class="fab fa-instagram"></i></a>
-                      <a class="" href="#"><i class="fab fa-youtube"></i></a>
-                  </div>
-              </div>
+    <!-- Logo à gauche -->
+    <div class="col-lg-3 bg-dark d-none d-lg-block">
+      <a href="/" class="navbar-brand w-100 h-100 m-0 p-0 d-flex align-items-center justify-content-center">
+        <h1 class="m-0 text-primary">TravelSync</h1>
+      </a>
+    </div>
+    <!-- Bandeau contact + navbar -->
+    <div class="col-lg-9">
+      <!-- Bandeau contact -->
+      <div class="row gx-0 bg-white d-none d-lg-flex">
+        <div class="col-lg-7 px-5 text-start">
+          <div class="h-100 d-inline-flex align-items-center py-2 me-4">
+            <i class="fa fa-envelope text-primary me-2"></i>
+            <p class="mb-0">travelsync@contact.com</p>
           </div>
-          <nav class="navbar navbar-expand-lg bg-dark navbar-dark p-3 p-lg-0">
-              <a href="/" class="navbar-brand d-block d-lg-none">
-                  <h1 class="m-0 text-primary text-uppercase">Travel_Sync</h1>
-              </a>  
-              <% if user_signed_in? %>
-              <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                  <% if current_user.role == "customer" %>
-                    <div class="navbar-nav mr-auto py-0">
-                         <%= link_to "Accueil", root_path,class:"nav-item nav-link" %>
-                        <%= link_to "Hotels", customer_hotels_path,class:"nav-item nav-link" %>
-                         <%= link_to "Voyages", customer_trips_path,class:"nav-item nav-link" %>
-                          <%= link_to "Voitures", customer_cars_path,class:"nav-item nav-link" %>
-                          <%= link_to "Mes reservations", customer_reservations_path,class:"nav-item nav-link" %>
-                           
-                        
-                    </div>
-                  <% end %>
-                  <div></div>
-                  <div>
-                      <%= form_with url: destroy_user_session_path, method: :delete do %>
-                        <a href="/dashboard/provider"><h3 class="nav-item nav-link active">
-                        <%= current_user.first_name %></a>
-
-                        <button type="submit" class="btn btn-primary">Déconnexion</button>
-                  </div>
-              </div>
-              <% end %>
-              <% else %>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                <a href=""></a>
-                <div>
-                <a href="/users/sign_up" class="btn btn-primary">Inscription</a>
-                <a href="/users/sign_in" class="btn btn-primary">Connexion</a>
-                </div>
-                </div>
-              <% end %>
-          </nav>
+          <div class="h-100 d-inline-flex align-items-center py-2">
+            <i class="fa fa-phone-alt text-primary me-2"></i>
+            <p class="mb-0">+227 87 35 37 99</p>
+          </div>
+        </div>
+        <div class="col-lg-5 px-5 text-end">
+          <div class="d-inline-flex align-items-center py-2">
+            <a class="me-3 text-dark" href="#"><i class="fab fa-facebook-f"></i></a>
+            <a class="me-3 text-dark" href="#"><i class="fab fa-twitter"></i></a>
+            <a class="me-3 text-dark" href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a class="me-3 text-dark" href="#"><i class="fab fa-instagram"></i></a>
+            <a class="text-dark" href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
       </div>
+      <!-- Navbar principale -->
+      <nav class="navbar navbar-expand-lg bg-dark navbar-dark p-3 p-lg-0">
+        <a href="/" class="navbar-brand d-block d-lg-none">
+          <h1 class="m-0 text-primary text-uppercase">Travel_Sync</h1>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+          <% if user_signed_in? %>
+            <% if current_user.role == "customer" %>
+              <div class="navbar-nav me-auto py-0">
+                <%= link_to "Accueil", root_path, class: "nav-item nav-link" %>
+                <%= link_to "Hôtels", customer_hotels_path, class: "nav-item nav-link" %>
+                <%= link_to "Voyages", customer_trips_path, class: "nav-item nav-link" %>
+                <%= link_to "Voitures", customer_cars_path, class: "nav-item nav-link" %>
+                <%= link_to "Mes réservations", customer_reservations_path, class: "nav-item nav-link" %>
+              </div>
+            <% elsif current_user.role == "provider" && current_user.provider.present? %>
+              <div class="navbar-nav me-auto py-0">
+                <%= link_to "Accueil", root_path, class: "nav-item nav-link" %>
+                <% case current_user.provider.type_provider %>
+                <% when "hotelier" %>
+                  <%= link_to "Mes Hôtels", dashboard_provider_path, class: "nav-item nav-link" %>
+                  <%= link_to "Réservations", provider_reservations_path, class: "nav-item nav-link" %>
+                <% when "travel_agency" %>
+                  <%= link_to "Mes Voyages", dashboard_provider_path, class: "nav-item nav-link" %>
+                  <%= link_to "Réservations", provider_reservations_path, class: "nav-item nav-link" %>
+                <% when "rental_agency" %>
+                  <%= link_to "Mes Voitures", dashboard_provider_path, class: "nav-item nav-link" %>
+                  <%= link_to "Réservations", provider_reservations_path, class: "nav-item nav-link" %>
+                <% else %>
+                  <%= link_to "Dashboard", dashboard_provider_path, class: "nav-item nav-link" %>
+                <% end %>
+              </div>
+            <% end %>
+            <!-- Profil & Déconnexion -->
+            <div class="d-flex align-items-center gap-3">
+              <% if current_user.role == "provider" && current_user.provider.present? && current_user.provider.type_provider.present? %>
+                <%= link_to "Mon Profil", provider_path, class: "btn btn-outline-light btn-sm" %>
+              <% else %>
+                <%= link_to current_user.first_name, edit_user_registration_path, class: "nav-item nav-link text-white" %>
+              <% end %>
+              <%= form_with url: destroy_user_session_path, method: :delete, local: true do %>
+                <%= button_tag "Déconnexion", class: "btn btn-primary btn-sm" %>
+              <% end %>
+            </div>
+          <% else %>
+            <!-- Non connecté -->
+            <div class="ms-auto d-flex align-items-center gap-3">
+              <%= link_to "Inscription", new_user_registration_path, class: "btn btn-primary btn-sm" %>
+              <%= link_to "Connexion", new_user_session_path, class: "btn btn-outline-light btn-sm" %>
+            </div>
+          <% end %>
+        </div>
+      </nav>
+    </div>
   </div>
 </div>
-

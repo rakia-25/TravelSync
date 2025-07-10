@@ -1,7 +1,44 @@
-<h1 class="text-2xl font-bold"><%= @car.brand %> <%= @car.model %></h1>
-<p><strong>Type:</strong> <%= @car.name %></p>
-<p><strong>Prix:</strong> <%= @car.price %> FCFA</p>
-<p><strong>Options:</strong> <%= @car.options %></p>
-<p><strong>Disponible:</strong> <%= @car.available ? "Oui" : "Non" %></p>
-<%= link_to "Réserver", new_customer_car_booking_path(@car), class: "btn btn-primary ml-2" %>
-<%= link_to "Retour",customer_cars_path, class: "text-blue-500" %>
+<div class="container my-5 p-4 bg-white rounded shadow" style="max-width: 600px;">
+  <h1 class="mb-4 fw-bold text-primary"><%= @car.brand %> <%= @car.model %></h1>
+  <% if @car.images.attached? %>
+    <div id="carImagesCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+      <div class="carousel-inner rounded">
+        <% @car.images.each_with_index do |image, index| %>
+          <div class="carousel-item <%= 'active' if index == 0 %>">
+            <%= image_tag image.variant(resize_to_limit: [600, 400]), class: "d-block w-100 rounded", alt: "#{@car.brand} #{@car.model} photo #{index + 1}" %>
+          </div>
+        <% end %>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carImagesCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Précédent</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carImagesCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Suivant</span>
+      </button>
+    </div>
+  <% else %>
+    <p class="text-center text-muted fst-italic mb-4">Aucune photo disponible pour cette voiture.</p>
+  <% end %>
+  <ul class="list-group mb-4">
+    <li class="list-group-item"><strong>Type :</strong> <%= @car.name %></li>
+    <li class="list-group-item"><strong>Prix :</strong> <%= number_to_currency(@car.price, unit: "FCFA ") %></li>
+    <li class="list-group-item"><strong>Options :</strong> <%= @car.options.presence || "Aucune" %></li>
+    <li class="list-group-item"><strong>Disponible :</strong>
+      <% if @car.available %>
+        <span class="badge bg-success">Oui</span>
+      <% else %>
+        <span class="badge bg-danger">Non</span>
+      <% end %>
+    </li>
+  </ul>
+  <div class="d-flex gap-3">
+    <% if @car.available %>
+      <%= link_to "Réserver", new_customer_car_booking_path(@car), class: "btn btn-primary flex-grow-1" %>
+    <% else %>
+      <button class="btn btn-secondary flex-grow-1" disabled>Indisponible</button>
+    <% end %>
+    <%= link_to "Retour à la liste", customer_cars_path, class: "btn btn-outline-primary flex-grow-1" %>
+  </div>
+</div>

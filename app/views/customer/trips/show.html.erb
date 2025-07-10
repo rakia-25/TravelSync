@@ -1,11 +1,45 @@
-<h1><%= @trip.title %></h1>
-<p><strong>Thème :</strong> <%= @trip.theme %></p>
-<p><strong>Programme :</strong> <%= simple_format(@trip.program) %></p>
-<p><strong>Durée :</strong> <%= @trip.duration %> jours</p>
-<p><strong>Départ :</strong> <%= @trip.departureCity %> – le <%= @trip.departureDate.strftime("%d/%m/%Y") %></p>
-<p><strong>Destination :</strong> <%= @trip.destinationCity %> – retour le <%= @trip.returnDate.strftime("%d/%m/%Y") %></p>
-<% if @trip.departureDate >= Date.today %>
-  <%= link_to "Réserver", new_customer_trip_booking_path(trip_id: @trip.id), class: "bg-blue-500 text-white px-4 py-2 rounded" %>
-<% else %>
-  <span class="text-gray-500 italic">Date dépassée</span>
-<% end %>
+<div class="container my-5">
+  <div class="row">
+    <!-- Colonne gauche : Galerie d'images -->
+    <div class="col-lg-6 mb-4">
+      <% if @trip.images.attached? %>
+        <div id="carouselTripImages" class="carousel slide shadow rounded" data-bs-ride="carousel">
+          <div class="carousel-inner rounded">
+            <% @trip.images.each_with_index do |image, index| %>
+              <div class="carousel-item <%= 'active' if index == 0 %>">
+                <%= image_tag image.variant(resize_to_limit: [700, 400]), class: "d-block w-100 rounded", alt: "Image #{@trip.title}" %>
+              </div>
+            <% end %>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselTripImages" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Précédent</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselTripImages" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Suivant</span>
+          </button>
+        </div>
+      <% else %>
+        <img src="https://via.placeholder.com/700x400?text=Pas+d%27image" class="img-fluid rounded shadow" alt="Pas d'image">
+      <% end %>
+    </div>
+    <!-- Colonne droite : Infos détaillées -->
+    <div class="col-lg-6">
+      <h1 class="fw-bold text-primary mb-3"><%= @trip.title %></h1>
+      <p class="text-muted fst-italic mb-3"><%= @trip.theme %></p>
+      <p><strong>Durée :</strong> <%= @trip.duration %> jour(s)</p>
+      <p><strong>Date de départ :</strong> <%= @trip.departureDate ? l(@trip.departureDate, format: :long) : "Non définie" %></p>
+      <p><strong>Programme :</strong></p>
+      <p class="mb-4"><%= simple_format(@trip.program) %></p>
+      <% if @trip.departureDate && @trip.departureDate >= Date.today && current_user&.customer? %>
+        <%= link_to "Réserver ce circuit", new_customer_trip_booking_path(@trip),
+              class: "btn btn-primary btn-lg rounded-pill px-5 py-3" %>
+      <% else %>
+        <button class="btn btn-secondary btn-lg rounded-pill px-5 py-3" disabled>
+          Réservation indisponible
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

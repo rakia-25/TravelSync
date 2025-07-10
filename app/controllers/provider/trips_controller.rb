@@ -16,7 +16,7 @@ class Provider::TripsController < ApplicationController
     if @trip.save
       redirect_to dashboard_provider_path, notice: "Voyage créé"
     else
-      render 'new', notice: "errur"
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -28,7 +28,7 @@ class Provider::TripsController < ApplicationController
     if @trip.update(trip_params)
       redirect_to provider_trip_path(@trip), notice: "Voyage modifié"
     else
-      render 'new', notice: "errur"
+      render :new, status: :unprocessable_entity
     end
   end
 

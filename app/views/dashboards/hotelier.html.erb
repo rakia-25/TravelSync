@@ -1,58 +1,59 @@
-<br><br>
-<h1 class="text-center mb-4 fw-bold fs-3">Bienvenue dans votre espace Hôtelier</h1>
-
-<div class="mb-3 text-muted text-center">
-  <p><strong>Prestataire :</strong> <%= @provider.type_provider %></p>
-  <p><strong>Entreprise  :</strong> <%= @provider.business  %></p>
-  <p><strong>Adresse :</strong> <%= @provider.address %></p>
-  <p><strong>Telephone :</strong> <%= @current_user.phone %></p>
-</div>
-
-<div class="text-center mb-4">
-  <%= link_to "Ajouter un hôtel", new_provider_hotel_path, class: "btn btn-primary" %>
-</div>
-
-<% if @hotels.any? %>
-  <div class="d-flex flex-wrap justify-content-center gap-4">
-    <% @hotels.each do |hotel| %>
-      <div class="card shadow-sm" style="width: 20rem;">
-        <div class="card-body">
-          <h5 class="card-title"><%= hotel.name %> (<%= hotel.stars %> étoiles)</h5>
-          <h6 class="card-subtitle mb-2 text-muted"><%= hotel.city %></h6>
-          <p class="card-text"><%= truncate(hotel.description, length: 100) %></p>
-
-          <% if hotel.images.attached? %>
-            <div class="d-flex flex-wrap gap-2 mt-3">
-              <% hotel.images.first(3).each do |image| %>
-                <div class="position-relative">
-                  <%= link_to url_for(image), target: "_blank", rel: "noopener" do %>
-                    <%= image_tag image.variant(resize_to_limit: [300, 200]).processed,
-                        class: "img-thumbnail rounded shadow-sm",
-                        alt: "#{hotel.name} - photo" %>
-                  <% end %>
-                  <%= button_to "✕", provider_hotel_purge_image_path(id: image.id, hotel_id: hotel.id),
-                        method: :delete,
-                        data: { confirm: "Voulez-vous supprimer cette image ?" },
-                        class: "btn btn-sm btn-danger position-absolute top-0 end-0 m-1 py-0 px-1" %>
-                </div>
+<!-- Début Container Hôtelier avec style "Rooms" -->
+<div class="container-xxl py-5">
+  <div class="container">
+    <h1 class="text-center mb-4 fw-bold fs-3 text-primary">Bienvenue dans votre espace Hôtelier</h1>
+    <div class="mb-4 text-muted text-center">
+      <p><strong>Prestataire :</strong> <%= @provider.type_provider %></p>
+      <p><strong>Entreprise :</strong> <%= @provider.business %></p>
+      <p><strong>Adresse :</strong> <%= @provider.address %></p>
+      <p><strong>Téléphone :</strong> <%= @current_user.phone %></p>
+    </div>
+    <div class="text-center mb-5">
+      <%= link_to "Ajouter un hôtel", new_provider_hotel_path, class: "btn btn-primary rounded-pill px-4 py-2" %>
+    </div>
+    <% if @hotels.any? %>
+      <div class="row g-4 justify-content-center">
+        <% @hotels.each do |hotel| %>
+          <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="card shadow rounded overflow-hidden h-100">
+              <% if hotel.images.attached? %>
+                <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]).processed,
+                      class: "card-img-top rounded-top img-fluid",
+                      alt: hotel.name %>
+              <% else %>
+                <%= image_tag "/img/radison.jpg", class: "card-img-top rounded-top img-fluid", alt: "Image par défaut" %>
               <% end %>
+              <div class="card-body p-4 text-center">
+                <h5 class="card-title fw-bold mb-2"><%= hotel.name %></h5>
+                <p class="text-muted mb-2"><i class="bi bi-geo-alt-fill me-1 text-primary"></i><%= hotel.city %></p>
+                <p class="text-warning mb-3" style="font-size: 1.1rem;">
+                  <% hotel.stars.times do %>
+                    <i class="fa fa-star"></i>
+                  <% end %>
+                </p>
+                <p class="text-body mb-3"><%= truncate(hotel.description, length: 80) %></p>
+              </div>
+              <div class="card-footer bg-white border-0 d-flex justify-content-around pb-4">
+                <%= link_to provider_hotel_path(hotel), class: "btn btn-sm btn-outline-primary rounded-pill px-4 py-2" do %>
+                  <i class="bi bi-eye-fill me-1"></i> Voir
+                <% end %>
+                <%= link_to edit_provider_hotel_path(hotel), class: "btn btn-sm btn-outline-warning rounded-pill px-4 py-2" do %>
+                  <i class="bi bi-pencil-fill me-1"></i> Modifier
+                <% end %>
+                <%= button_to provider_hotel_path(hotel),
+                      method: :delete,
+                      data: { confirm: "Supprimer cet hôtel ?" },
+                      class: "btn btn-sm btn-outline-danger rounded-pill px-4 py-2" do %>
+                  <i class="bi bi-trash-fill me-1"></i> Supprimer
+                <% end %>
+              </div>
             </div>
-          <% else %>
-            <p class="text-muted fst-italic mt-2">Aucune image disponible</p>
-          <% end %>
-
-          <div class="mt-4 d-flex gap-2 justify-content-center">
-            <%= link_to "Voir", provider_hotel_path(hotel), class: "btn btn-sm btn-info" %>
-            <%= link_to "Modifier", edit_provider_hotel_path(hotel), class: "btn btn-sm btn-warning" %>
-            <%= button_to "Supprimer", provider_hotel_path(hotel),
-                  method: :delete,
-                  data: { confirm: "Supprimer cet hôtel ?" },
-                  class: "btn btn-sm btn-danger" %>
           </div>
-        </div>
+        <% end %>
       </div>
+    <% else %>
+      <p class="text-center text-muted fst-italic">Vous n'avez encore enregistré aucun hôtel.</p>
     <% end %>
   </div>
-<% else %>
-  <p class="text-muted fst-italic text-center">Vous n'avez encore enregistré aucun hôtel.</p>
-<% end %>
+</div>
+<!-- Fin Container Hôtelier -->

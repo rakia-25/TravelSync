@@ -1,34 +1,30 @@
-<div class="max-w-6xl mx-auto mt-10 px-4">
-  <h1 class="text-3xl font-bold text-center text-indigo-700 mb-8">Liste des circuits</h1>
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-      <thead class="bg-indigo-600 text-white text-left text-sm uppercase">
-        <tr>
-          <th class="px-6 py-3">Titre</th>
-          <th class="px-6 py-3">Thème</th>
-          <th class="px-6 py-3">Durée</th>
-          <th class="px-6 py-3">Départ</th>
-          <th class="px-6 py-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700 text-sm divide-y divide-gray-200">
-        <% @trips.each do |trip| %>
-          <tr class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4 font-medium"><%= trip.title %></td>
-            <td class="px-6 py-4"><%= trip.theme %></td>
-            <td class="px-6 py-4"><%= trip.duration %> jours</td>
-            <td class="px-6 py-4"><%= trip.departureDate.strftime("%d/%m/%Y") if trip.departureDate %></td>
-            <td class="px-6 py-4 space-x-2">
-              <%= link_to "Voir", customer_trip_path(trip), class: "inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm" %>
+<div class="container my-5">
+  <h1 class="text-center text-primary fw-bold mb-4 fs-3">Liste des circuits</h1>
+  <div class="row g-4">
+    <% @trips.each do |trip| %>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <% if trip.images.attached? %>
+            <%= image_tag trip.images.variant(resize_to_limit: [400, 250]), class: "card-img-top", alt: trip.title %>
+          <% else %>
+            <img src="https://via.placeholder.com/400x250?text=Pas+d'image" class="card-img-top" alt="Pas d'image" />
+          <% end %>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold"><%= trip.title %></h5>
+            <h6 class="card-subtitle mb-2 text-muted"><%= trip.theme %></h6>
+            <p class="card-text mb-1"><strong>Durée :</strong> <%= trip.duration %> jours</p>
+            <p class="card-text mb-3"><strong>Départ :</strong> <%= trip.departureDate&.strftime("%d/%m/%Y") || "Non défini" %></p>
+            <div class="mt-auto d-flex gap-2">
+              <%= link_to "Voir", customer_trip_path(trip), class: "btn btn-outline-secondary btn-sm" %>
               <% if trip.departureDate && trip.departureDate >= Date.today %>
-                <%= button_to "Réserver", customer_trip_bookings_path(trip), method: :post, class: "inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm" %>
+                <%= button_to "Réserver", customer_trip_bookings_path(trip), method: :post, class: "btn btn-primary btn-sm" %>
               <% else %>
-                <span class="text-gray-400 italic text-sm">Date dépassée</span>
+                <span class="text-muted fst-italic small align-self-center">Date dépassée</span>
               <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
 </div>

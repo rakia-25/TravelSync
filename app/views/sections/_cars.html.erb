@@ -1,0 +1,44 @@
+<section id="cars" class="container-xxl py-5">
+  <div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+      <h6 class="section-title text-center text-primary text-uppercase">Location de voitures</h6>
+      <h1 class="mb-5">Choisissez votre <span class="text-primary text-uppercase">véhicule idéal</span></h1>
+    </div>
+    <div class="row g-4">
+      <% if @cars.present? %>
+        <% @cars.each_with_index do |car, index| %>
+          <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<%= (index * 0.2).round(1) %>s">
+            <div class="room-item shadow rounded overflow-hidden">
+              <div class="position-relative">
+                <% if car.images.attached? %>
+                  <%= image_tag car.images.variant(resize_to_limit: [400, 250]), class: "img-fluid card-img-fixed", alt: "#{car.brand} #{car.model}" %>
+                <% else %>
+                  <%= image_tag "/img/voyage.webp", class: "img-fluid w-100", alt: "Voiture par défaut" %>
+                <% end %>
+                <% if car.price %>
+                  <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">
+                    <%= number_to_currency(car.price, unit: "", precision: 0) %> FCFA / jour
+                  </small>
+                <% end %>
+              </div>
+              <div class="p-4 mt-2">
+                <h5 class="mb-2"><%= car.brand %> – <%= car.model %></h5>
+                <p class="text-muted mb-2"><i class="fa fa-car-side me-2"></i>Type : <%= car.name %></p>
+                <p class="text-muted mb-2"><i class="fa fa-cogs me-2"></i><%= truncate(car.options, length: 80) %></p>
+                <p class="text-muted">
+                  <i class="fa <%= car.available ? 'fa-check-circle text-success' : 'fa-times-circle text-danger' %> me-2"></i>
+                  <%= car.available ? "Disponible" : "Indisponible" %>
+                </p>
+                <div class="d-flex justify-content-between mt-3">
+                  <%= link_to "Voir Détails", customer_car_path(car), class: "btn btn-sm btn-primary rounded py-2 px-4" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-center">Aucune voiture disponible pour l'instant.</p>
+      <% end %>
+    </div>
+  </div>
+</section>
