@@ -29,9 +29,9 @@ class Customer::ReservationsController < ApplicationController
     @reservation = current_user.reservations.find(params[:id])
     if @reservation.confirmed?
       @reservation.update(status: :paid)
-      redirect_to users_reservations_index__path, notice: "Paiement effectué avec succès."
+      redirect_to customer_reservations_path, notice: "Paiement effectué avec succès."
     else
-      redirect_to users_reservations_index_path, alert: "Seules les réservations confirmées peuvent être payées."
+      redirect_to customer_reservations_path, alert: "Seules les réservations confirmées peuvent être payées."
     end
   end
   private

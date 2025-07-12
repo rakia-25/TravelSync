@@ -44,9 +44,9 @@ class Customer::BookingsController < ApplicationController
     end
     def reservation_conflict?(reservable, start_date, end_date)
       reservable.reservations
-        .where(status: "confirmed")
-        .where("start_date < ? AND end_date > ?", end_date, start_date)
-        .exists?
+      .where(status: %w[confirmed paid])
+      .where("start_date < ? AND end_date > ?", end_date, start_date)
+      .exists?
     end
   
     def reservation_params
