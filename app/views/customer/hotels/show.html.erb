@@ -51,7 +51,9 @@
                         Du <%= l res.start_date %> au <%= l res.end_date %>
                         <% if res.status == "confirmed" %>
                           <span class="text-success">(confirmée)</span>
-                        <% else %>
+                        <% elsif res.status == "paid"  %>
+                          <span class="text-success">(confirmée)</span>
+                        <% elsif res.status == "pending"  %>
                           <span class="text-muted">(en attente)</span>
                         <% end %>
                       </li>

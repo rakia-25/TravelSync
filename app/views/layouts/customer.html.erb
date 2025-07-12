@@ -24,6 +24,21 @@
   <body>
     <div class="bg-white p-0">
       <%= render 'shared/navbar' %>
+      <% flash.each do |type, message| %>
+        <% alert_class = case type.to_sym
+    when :notice then "alert-success"
+    when :alert then "alert-danger"
+    when :info then "alert-info"
+    when :warning then "alert-warning"
+    else "alert-secondary"
+  end %>
+        <div class="container mt-3">
+          <div class="alert <%= alert_class %> alert-dismissible fade show" role="alert">
+            <%= message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+      <% end %>
       <%= yield %>
       <!-- Newsletter -->
       <%= render 'shared/newsletter' %>
