@@ -25,15 +25,7 @@ class Customer::ReservationsController < ApplicationController
       render :edit, status: :unprocessable_entity
     end
   end
-  def pay
-    @reservation = current_user.reservations.find(params[:id])
-    if @reservation.confirmed?
-      @reservation.update(status: :paid)
-      redirect_to customer_reservations_path, notice: "Paiement effectué avec succès."
-    else
-      redirect_to customer_reservations_path, alert: "Seules les réservations confirmées peuvent être payées."
-    end
-  end
+ 
   private
   def set_reservation
     @reservation = current_user.reservations.find(params[:id])

@@ -36,9 +36,10 @@ Rails.application.routes.draw do
       resources :bookings, only: [:new, :create]
     end
     resources :reservations, only: [:index, :show, :edit, :update] do 
-      member do
-        patch :pay
-      end
+      resources :payments, only: [:new, :create, :show]
+      post 'webhook', on: :collection
+
+     
     end 
     get "/menu", to: "menu#index", as: :menu_customer
   end

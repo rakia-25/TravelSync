@@ -12,6 +12,26 @@ class Reservation < ApplicationRecord
   validate :end_date_after_start_date
   validate :start_date_cannot_be_in_the_past
 
+def total_price
+  return 0 unless reservable.present?
+
+  case reservable
+  when Room
+    days = (end_date - start_date).to_i
+    days = 1 if days < 1
+    reservable.price * days
+  when Car
+    days = (end_date - start_date).to_i
+    days = 1 if days < 1
+    reservable.price * days
+  when Trip
+    reservable.price
+  else
+    0
+  end
+end
+
+
   private
 
   def end_date_after_start_date

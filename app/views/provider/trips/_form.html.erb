@@ -46,6 +46,10 @@
         <%= f.label :destinationCity, "Ville de destination", class: "form-label" %>
         <%= f.text_field :destinationCity, class: "form-control" %>
       </div>
+      <div class="mb-3">
+        <%= f.label :price, "Prix (FCFA)", class: "form-label" %>
+        <%= f.number_field :price, step: 1000, placeholder: "Ex: 15000", class: "form-control" %>
+      </div>
       <div class="col-12">
         <label class="form-label">Photos</label>
         <%= f.file_field :images, multiple: true, direct_upload: true, class: "form-control" %>

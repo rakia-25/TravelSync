@@ -47,7 +47,8 @@ class Provider::TripsController < ApplicationController
     params.require(:trip).permit(
       :title, :theme, :program, :duration,
       :departureDate, :returnDate,
-      :departureCity, :destinationCity
+      :departureCity, :destinationCity,
+      :price
     )
   end
   def check_travel_agency
