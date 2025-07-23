@@ -5,6 +5,7 @@
       <p><strong>Thème :</strong> <%= @trip.theme %></p>
       <p><strong>Programme :</strong> <%= simple_format(@trip.program) %></p>
       <p><strong>Durée :</strong> <%= @trip.duration %> jours</p>
+      <p><strong>Prix :</strong> <%= number_with_delimiter(@trip.price) %> FCFA</p>
       <p>
         <strong>Départ :</strong>
         <%= @trip.departureCity %> – le <%= @trip.departureDate.strftime("%d/%m/%Y") if @trip.departureDate %>

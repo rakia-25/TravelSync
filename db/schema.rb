@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_07_114014) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_23_092454) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -75,6 +75,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_07_114014) do
     t.index ["provider_id"], name: "index_hotels_on_provider_id"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.decimal "amount"
+    t.string "payment_method"
+    t.string "status"
+    t.integer "reservation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reservation_id"], name: "index_payments_on_reservation_id"
+  end
+
   create_table "providers", force: :cascade do |t|
     t.string "business"
     t.string "type_provider"
@@ -123,6 +133,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_07_114014) do
     t.integer "provider_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "price"
     t.index ["provider_id"], name: "index_trips_on_provider_id"
   end
 
@@ -148,6 +159,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_07_114014) do
   add_foreign_key "hotel_trips", "hotels"
   add_foreign_key "hotel_trips", "trips"
   add_foreign_key "hotels", "providers"
+  add_foreign_key "payments", "reservations"
   add_foreign_key "providers", "users"
   add_foreign_key "reservations", "users"
   add_foreign_key "rooms", "hotels"

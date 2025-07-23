@@ -42,13 +42,20 @@
   </div>
 
   <% if @reservation.confirmed? %>
-    <%= link_to "Payer maintenant", pay_customer_reservation_path(@reservation),
-      method: :patch,
-      data: { turbo_method: :patch, confirm: "Confirmer le paiement ?" },
-      class: "btn btn-success me-2" %>
-  <% elsif @reservation.paid? %>
-    <span class="badge bg-success fs-6">✔️ Réservation payée</span>
+    <button
+      type="button"
+      class="ipaymoney-button"
+      data-amount="<%= @reservation.total_price %>" 
+      data-environement="sandbox"
+      data-key="pk_e5b267f879f547d08f4dda9afada13a9" 
+      data-transaction-id="RES-<%= @reservation.id %>-<%= Time.now.to_i %>"
+      data-redirect-url="<%= customer_reservation_url(@reservation) %>"
+      data-callback-url="<%= webhook_customer_reservations_url %>"
+    >
+      Payer maintenant
+    </button>
   <% end %>
 
   <%= link_to "Retour à mes réservations", customer_reservations_path, class: "btn btn-outline-primary ms-2" %>
 </div>
+<script src="https://i-pay.money/checkout.js"></script>
