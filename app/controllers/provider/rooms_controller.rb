@@ -1,4 +1,5 @@
 class Provider::RoomsController < ApplicationController
+    layout "dashboard"
     before_action :set_hotel
     before_action :set_room, only: %i[edit update destroy show]
     def new

@@ -1,4 +1,5 @@
     class Provider::HotelsController < ApplicationController
+        layout "dashboard"
         before_action :authenticate_user!
         before_action :check_hotelier
         before_action :set_hotel, only: [:show, :edit, :update, :destroy]

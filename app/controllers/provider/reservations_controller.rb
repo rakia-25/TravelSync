@@ -1,4 +1,5 @@
 class Provider::ReservationsController < ApplicationController
+  layout "dashboard"
     before_action :authenticate_user!
     before_action :check_provider
   

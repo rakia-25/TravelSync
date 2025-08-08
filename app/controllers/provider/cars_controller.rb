@@ -1,5 +1,5 @@
 class Provider::CarsController < ApplicationController
-
+layout "dashboard"
   before_action :authenticate_user!
   before_action :check_rental_agency
   before_action :set_car, only: [:show, :edit, :update, :destroy]

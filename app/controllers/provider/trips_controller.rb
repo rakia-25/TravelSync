@@ -1,4 +1,5 @@
 class Provider::TripsController < ApplicationController
+  layout "dashboard"
   before_action :authenticate_user!
   before_action :check_travel_agency
   before_action :set_trip, only: %i[show edit update destroy]
