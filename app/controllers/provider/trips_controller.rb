@@ -1,8 +1,14 @@
 class Provider::TripsController < ApplicationController
   layout "dashboard"
   before_action :authenticate_user!
+   before_action :set_provider
   before_action :check_travel_agency
   before_action :set_trip, only: %i[show edit update destroy]
+
+ def index
+  @trips = current_user.provider.trips.order(created_at: :desc)
+    
+  end
 
   def show
    
@@ -40,6 +46,10 @@ class Provider::TripsController < ApplicationController
 
   private
 
+  def set_provider
+            @provider = current_user.provider
+  end
+
   def set_trip
    @trip = current_user.provider.trips.find(params[:id])
   end
@@ -49,7 +59,8 @@ class Provider::TripsController < ApplicationController
       :title, :theme, :program, :duration,
       :departureDate, :returnDate,
       :departureCity, :destinationCity,
-      :price
+      :price,
+     images: []
     )
   end
   def check_travel_agency

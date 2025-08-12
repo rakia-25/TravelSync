@@ -1,6 +1,7 @@
 class Provider::RoomsController < ApplicationController
     layout "dashboard"
     before_action :set_hotel
+     before_action :set_provider
     before_action :set_room, only: %i[edit update destroy show]
     def new
         @room = @hotel.rooms.build
@@ -30,7 +31,9 @@ class Provider::RoomsController < ApplicationController
     end
 
     private
-
+    def set_provider
+            @provider = current_user.provider
+        end
     def set_hotel
         @hotel = Hotel.find(params[:hotel_id])
     end

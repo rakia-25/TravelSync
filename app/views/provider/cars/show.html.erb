@@ -1,30 +1,329 @@
-<div class="container py-5 d-flex justify-content-center">
-  <div class="card shadow p-4 w-100" style="max-width: 600px;">
-    <h1 class="text-center mb-4 fs-3 fw-bold">
-      <%= @car.brand %> <%= @car.model %>
-    </h1>
+<div class="max-w-7xl mx-auto p-6">
 
-    <ul class="list-group list-group-flush mb-4">
-      <li class="list-group-item">
-        <strong>Type :</strong> <%= @car.name %>
-      </li>
-      <li class="list-group-item">
-        <strong>Prix :</strong> <%= number_with_delimiter(@car.price) %> FCFA
-      </li>
-      <li class="list-group-item">
-        <strong>Options :</strong> <%= @car.options.presence || "Non spécifiées" %>
-      </li>
-      <li class="list-group-item">
-        <strong>Disponible :</strong>
-        <span class="badge bg-<%= @car.available ? 'success' : 'secondary' %>">
-          <%= @car.available ? "Oui" : "Non" %>
-        </span>
-      </li>
-    </ul>
+  <!-- En-tête avec navigation -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center space-x-4">
+        <%= link_to provider_cars_path,
+          class: "p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors" ,
+          title: "Retour à la liste" do %>
+          <i class="fas fa-arrow-left text-lg"></i>
+          <% end %>
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                <i class="fas fa-car text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900">
+                  <%= @car.name.presence || "#{@car.brand} #{@car.model}" %>
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">
+                  Détails du véhicule
+                </p>
+              </div>
+            </div>
+      </div>
 
-    <div class="d-flex justify-content-between">
-      <%= link_to "Modifier", edit_provider_car_path(@car), class: "btn btn-warning" %>
-      <%= link_to "Retour", dashboard_provider_path, class: "btn btn-outline-primary" %>
+      <div class="flex items-center space-x-3">
+        <!-- Statut de disponibilité -->
+        <% if @car.available %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <i class="fas fa-check-circle mr-2"></i>
+            Disponible
+          </span>
+          <% else %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+              <i class="fas fa-times-circle mr-2"></i>
+              Indisponible
+            </span>
+            <% end %>
+
+              <!-- Actions -->
+              <%= link_to edit_provider_car_path(@car),
+                class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+                <i class="fas fa-edit mr-2"></i>
+                Modifier
+                <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Colonne principale -->
+    <div class="lg:col-span-2 space-y-8">
+
+      <!-- Galerie d'images -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-images text-green-600 mr-2"></i>
+            Photos du véhicule
+          </h2>
+        </div>
+
+        <div class="p-6">
+          <% if @car.images&.attached? && @car.images.any? %>
+            <!-- Image principale -->
+            <div class="mb-4">
+              <div class="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                <%= image_tag @car.images.first, class: "w-full h-full object-cover" , id: "mainImage" %>
+              </div>
+            </div>
+
+            <!-- Miniatures -->
+            <% if @car.images.count> 1 %>
+              <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                <% @car.images.each_with_index do |image, index| %>
+                  <button type="button"
+                    class="aspect-square rounded-lg overflow-hidden bg-gray-100 ring-2 ring-transparent hover:ring-green-500 transition-all duration-200 thumbnail-btn <%= 'ring-green-500' if index == 0 %>"
+                    onclick="changeMainImage('<%= url_for(image) %>', this)">
+                    <%= image_tag image, class: "w-full h-full object-cover" %>
+                  </button>
+                  <% end %>
+              </div>
+              <% end %>
+                <% else %>
+                  <!-- Placeholder quand aucune image -->
+                  <div
+                    class="aspect-video rounded-lg bg-gray-50 flex flex-col items-center justify-center text-gray-400">
+                    <i class="fas fa-car text-4xl mb-2"></i>
+                    <p class="text-sm">Aucune photo disponible</p>
+                  </div>
+                  <% end %>
+        </div>
+      </div>
+
+      <!-- Caractéristiques détaillées -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-cogs text-green-600 mr-2"></i>
+            Caractéristiques & Options
+          </h2>
+        </div>
+
+        <div class="p-6">
+          <% if @car.options.present? %>
+            <div class="prose prose-sm text-gray-600 max-w-none">
+              <%= simple_format(@car.options) %>
+            </div>
+            <% else %>
+              <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-info-circle text-2xl mb-2 block"></i>
+                <p>Aucune option ou caractéristique renseignée</p>
+              </div>
+              <% end %>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+
+      <!-- Informations principales -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-info-circle text-green-600 mr-2"></i>
+            Informations principales
+          </h2>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <!-- Nom du véhicule -->
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <dt class="text-sm font-medium text-gray-500 mb-1">Nom du véhicule</dt>
+              <dd class="text-lg font-semibold text-gray-900">
+                <%= @car.name.presence || "#{@car.brand} #{@car.model}" %>
+              </dd>
+            </div>
+          </div>
+
+          <!-- Marque -->
+          <% if @car.brand.present? %>
+            <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+              <dt class="text-sm font-medium text-gray-500 flex items-center">
+                <i class="fas fa-tag mr-2"></i>
+                Marque
+              </dt>
+              <dd class="text-sm font-semibold text-gray-900">
+                <%= @car.brand %>
+              </dd>
+            </div>
+            <% end %>
+
+              <!-- Modèle -->
+              <% if @car.model.present? %>
+                <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                  <dt class="text-sm font-medium text-gray-500 flex items-center">
+                    <i class="fas fa-car-side mr-2"></i>
+                    Modèle
+                  </dt>
+                  <dd class="text-sm font-semibold text-gray-900">
+                    <%= @car.model %>
+                  </dd>
+                </div>
+                <% end %>
+
+                  <!-- Prix -->
+                  <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                    <dt class="text-sm font-medium text-gray-500 flex items-center">
+                      <i class="fas fa-euro-sign mr-2"></i>
+                      Prix par jour
+                    </dt>
+                    <dd class="text-lg font-bold text-green-600">
+                      <%= number_to_currency(@car.price, unit: '' , precision: 0) %>€
+                    </dd>
+                  </div>
+
+                  <!-- Disponibilité -->
+                  <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                    <dt class="text-sm font-medium text-gray-500 flex items-center">
+                      <i class="fas fa-calendar-check mr-2"></i>
+                      Statut
+                    </dt>
+                    <dd>
+                      <% if @car.available %>
+                        <span
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <i class="fas fa-check-circle mr-1"></i>
+                          Disponible
+                        </span>
+                        <% else %>
+                          <span
+                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times-circle mr-1"></i>
+                            Indisponible
+                          </span>
+                          <% end %>
+                    </dd>
+                  </div>
+        </div>
+      </div>
+
+      <!-- Informations techniques -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-wrench text-green-600 mr-2"></i>
+            Informations techniques
+          </h2>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <!-- Date de création -->
+          <div class="flex items-center justify-between">
+            <dt class="text-sm font-medium text-gray-500 flex items-center">
+              <i class="fas fa-plus-circle mr-2"></i>
+              Ajouté le
+            </dt>
+            <dd class="text-sm text-gray-900">
+              <%= l(@car.created_at, format: :short) %>
+            </dd>
+          </div>
+
+          <!-- Dernière modification -->
+          <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+            <dt class="text-sm font-medium text-gray-500 flex items-center">
+              <i class="fas fa-edit mr-2"></i>
+              Modifié le
+            </dt>
+            <dd class="text-sm text-gray-900">
+              <%= l(@car.updated_at, format: :short) %>
+            </dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-bolt text-green-600 mr-2"></i>
+            Actions rapides
+          </h2>
+        </div>
+
+        <div class="p-6 space-y-3">
+          <%= link_to edit_provider_car_path(@car),
+            class: "w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+            <i class="fas fa-edit mr-2"></i>
+            Modifier les informations
+            <% end %>
+
+              <button type="button" onclick="toggleAvailability()"
+                class="w-full inline-flex items-center justify-center px-4 py-2 <%= @car.available ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500' %> text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200">
+                <% if @car.available %>
+                  <i class="fas fa-times-circle mr-2"></i>
+                  Marquer indisponible
+                  <% else %>
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Marquer disponible
+                    <% end %>
+              </button>
+
+              <%= link_to provider_car_path(@car), data: { turbo_method: :delete,
+                turbo_confirm: "Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible." },
+                class: "w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200" do %>
+                <i class="fas fa-trash mr-2"></i>
+                Supprimer le véhicule
+                <% end %>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<%= content_for :scripts do %>
+  <script>
+    // Changement d'image principale
+    function changeMainImage(imageUrl, thumbnail) {
+      const mainImage = document.getElementById('mainImage');
+      const thumbnails = document.querySelectorAll('.thumbnail-btn');
+
+      // Changer l'image principale
+      mainImage.src = imageUrl;
+
+      // Mettre à jour les styles des miniatures
+      thumbnails.forEach(btn => btn.classList.remove('ring-green-500'));
+      thumbnail.classList.add('ring-green-500');
+    }
+
+    // Toggle disponibilité (simulation - à adapter selon votre backend)
+    function toggleAvailability() {
+      // Cette fonction devrait faire un appel AJAX pour changer le statut
+      // Ici c'est juste une simulation pour l'exemple
+      const currentStatus = <%= @car.available.to_json %>;
+
+      if (confirm(`Êtes-vous sûr de vouloir ${currentStatus ? 'marquer ce véhicule comme indisponible' : 'marquer ce véhicule comme disponible'} ?`)) {
+        // Ici vous pourriez faire un appel AJAX pour changer le statut
+        // Par exemple avec fetch() ou Rails UJS
+        console.log('Toggle availability for car <%= @car.id %>');
+
+        // Pour l'instant, on recharge la page
+        // Dans une vraie application, vous feriez un appel AJAX
+        location.reload();
+      }
+    }
+
+    // Animation au chargement
+    document.addEventListener('DOMContentLoaded', function () {
+      // Animation fade-in pour les sections
+      const sections = document.querySelectorAll('.bg-white');
+      sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+          section.style.transition = 'all 0.6s ease-out';
+          section.style.opacity = '1';
+          section.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+    });
+  </script>
+  <% end %>

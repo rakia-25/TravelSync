@@ -1,13 +1,13 @@
 class DashboardsController < ApplicationController
   layout "dashboard"
   require "csv"
-  
+
   before_action :authenticate_user!
+  before_action :set_provider      # <- Doit venir AVANT
   before_action :redirect_by_role
-  before_action :set_provider
 
   def provider
-    case @provider.provider_type
+    case @provider.type_provider
     when "hotelier"
       handle_hotelier_dashboard
     when "rental_agency"
@@ -20,7 +20,7 @@ class DashboardsController < ApplicationController
   end
 
   def export_data
-    case @provider.provider_type
+    case @provider.type_provider
     when "hotelier"
       export_hotels
     when "rental_agency"
@@ -53,15 +53,15 @@ class DashboardsController < ApplicationController
     @hotels = @provider.hotels.includes(:rooms)
     @total_rooms = @hotels.sum { |h| h.rooms.count }
 
-    # Récupérer toutes les réservations des chambres
     room_ids = @hotels.flat_map { |h| h.rooms.pluck(:id) }
-    @reservations = Reservation.includes(:reservable)
-                              .where(reservable_type: "Room", reservable_id: room_ids)
+
+    @reservations = Reservation.where(reservable_type: "Room", reservable_id: room_ids)
+    @rooms = Room.includes(:hotel).where(id: room_ids).index_by(&:id)
 
     calculate_hotelier_metrics
     set_hotelier_period_data
     set_hotelier_recent_activities
-    
+
     render "dashboards/hotelier"
   end
 
@@ -70,40 +70,40 @@ class DashboardsController < ApplicationController
     @confirmed_reservations = @reservations.where(status: "confirmed").count
     @pending_reservations = @reservations.where(status: "pending").count
     @cancelled_reservations = @reservations.where(status: "cancelled").count
-    
+
     # Revenus
-    @total_revenue = @reservations.where(status: "confirmed").sum(:total_price) || 0
+    @total_revenue = @reservations.where(status: "confirmed").sum(&:total_price) || 0
     @monthly_revenue = @reservations.where(status: "confirmed")
-                                   .where("created_at >= ?", 1.month.ago)
-                                   .sum(:total_price) || 0
+                                    .where("created_at >= ?", 1.month.ago)
+                                    .sum(&:total_price) || 0
   end
 
   def set_hotelier_period_data
     period = params[:period] || "week"
-    
+
     @filtered_reservations = case period
-                            when "month"
-                              @reservations.where("created_at >= ?", 1.month.ago)
-                            when "year"
-                              @reservations.where("created_at >= ?", 1.year.ago)
-                            else
-                              @reservations.where("created_at >= ?", 1.week.ago)
-                            end
+                             when "month"
+                               @reservations.where("created_at >= ?", 1.month.ago)
+                             when "year"
+                               @reservations.where("created_at >= ?", 1.year.ago)
+                             else
+                               @reservations.where("created_at >= ?", 1.week.ago)
+                             end
 
     # Statistiques par hôtel
     @reserv_by_hotel = calculate_reservations_by_hotel(@filtered_reservations)
-    
+
     # Taux d'occupation
     @occupancy_rate = calculate_occupancy_rate(@filtered_reservations, period)
   end
 
   def calculate_reservations_by_hotel(reservations)
     hotel_counts = @hotels.map { |hotel| [hotel.name, 0] }.to_h
-    
+
     reservations_by_room = reservations.group(:reservable_id).count
     rooms_by_id = Room.where(id: reservations_by_room.keys)
-                     .includes(:hotel)
-                     .index_by(&:id)
+                      .includes(:hotel)
+                      .index_by(&:id)
 
     reservations_by_room.each do |room_id, count|
       hotel_name = rooms_by_id[room_id]&.hotel&.name
@@ -115,16 +115,16 @@ class DashboardsController < ApplicationController
 
   def calculate_occupancy_rate(reservations, period)
     return 0 if @total_rooms.zero?
-    
+
     days_in_period = case period
-                    when "month" then 30
-                    when "year" then 365
-                    else 7
-                    end
-    
+                     when "month" then 30
+                     when "year"  then 365
+                     else 7
+                     end
+
     total_possible_reservations = @total_rooms * days_in_period
     confirmed_reservations = reservations.where(status: "confirmed").count
-    
+
     ((confirmed_reservations.to_f / total_possible_reservations) * 100).round(2)
   end
 
@@ -133,21 +133,21 @@ class DashboardsController < ApplicationController
 
     # Nouvelles réservations
     new_reservations = @reservations.order(created_at: :desc)
-                                   .limit(3)
-                                   .map do |reservation|
+                                    .limit(3)
+                                    .map do |reservation|
       {
         type: :reservation_new,
-        message: "Nouvelle réservation à l'Hôtel #{reservation.reservable.hotel.name}",
+        message: "Nouvelle réservation à l'Hôtel #{@rooms[reservation.reservable_id]&.hotel&.name}",
         time: reservation.created_at,
         icon: "calendar-plus"
       }
     end
 
     # Réservations confirmées récemment
-    confirmed_reservations = @reservations.where(status: 'confirmed')
-                                         .order(updated_at: :desc)
-                                         .limit(3)
-                                         .map do |r|
+    confirmed_reservations = @reservations.where(status: "confirmed")
+                                          .order(updated_at: :desc)
+                                          .limit(3)
+                                          .map do |r|
       {
         type: :reservation_confirmed,
         message: "Réservation confirmée à l'Hôtel #{r.reservable.hotel.name}",
@@ -158,9 +158,9 @@ class DashboardsController < ApplicationController
 
     # Nouvelles chambres
     new_rooms = Room.where(hotel_id: @hotels.pluck(:id))
-                   .order(created_at: :desc)
-                   .limit(2)
-                   .map do |room|
+                    .order(created_at: :desc)
+                    .limit(2)
+                    .map do |room|
       {
         type: :room_new,
         message: "Nouvelle chambre ajoutée à l'Hôtel #{room.hotel.name}",
@@ -170,9 +170,9 @@ class DashboardsController < ApplicationController
     end
 
     @recent_activities = (new_reservations + confirmed_reservations + new_rooms)
-                        .sort_by { |activity| activity[:time] }
-                        .reverse
-                        .take(8)
+                         .sort_by { |activity| activity[:time] }
+                         .reverse
+                         .take(8)
   end
 
   # ==================== RENTAL AGENCY DASHBOARD ====================
@@ -181,12 +181,12 @@ class DashboardsController < ApplicationController
     @total_cars = @cars.count
 
     @reservations = Reservation.includes(:reservable)
-                              .where(reservable_type: "Car", reservable_id: @cars.pluck(:id))
+                               .where(reservable_type: "Car", reservable_id: @cars.pluck(:id))
 
     calculate_rental_metrics
     set_rental_period_data
     set_rental_recent_activities
-    
+
     render "dashboards/rental_agency"
   end
 
@@ -195,29 +195,29 @@ class DashboardsController < ApplicationController
     @confirmed_reservations = @reservations.where(status: "confirmed").count
     @pending_reservations = @reservations.where(status: "pending").count
     @cancelled_reservations = @reservations.where(status: "cancelled").count
-    
+
     # Voitures disponibles
-    @available_cars = @cars.where(status: "available").count
-    @rented_cars = @cars.where(status: "rented").count
-    
+    @available_cars = @cars.where(available: "true").count
+    @rented_cars = @cars.where(available: "true").count
+
     # Revenus
-    @total_revenue = @reservations.where(status: "confirmed").sum(:total_price) || 0
+    @total_revenue = @reservations.where(status: "confirmed").sum(&:total_price) || 0
     @monthly_revenue = @reservations.where(status: "confirmed")
-                                   .where("created_at >= ?", 1.month.ago)
-                                   .sum(:total_price) || 0
+                                    .where("created_at >= ?", 1.month.ago)
+                                    .sum(&:total_price) || 0
   end
 
   def set_rental_period_data
     period = params[:period] || "week"
-    
+
     @filtered_reservations = case period
-                            when "month"
-                              @reservations.where("created_at >= ?", 1.month.ago)
-                            when "year"
-                              @reservations.where("created_at >= ?", 1.year.ago)
-                            else
-                              @reservations.where("created_at >= ?", 1.week.ago)
-                            end
+                             when "month"
+                               @reservations.where("created_at >= ?", 1.month.ago)
+                             when "year"
+                               @reservations.where("created_at >= ?", 1.year.ago)
+                             else
+                               @reservations.where("created_at >= ?", 1.week.ago)
+                             end
 
     # Statistiques par voiture
     @reserv_by_car = @cars.map do |car|
@@ -226,7 +226,7 @@ class DashboardsController < ApplicationController
         model: car.model,
         count: @filtered_reservations.where(reservable_id: car.id).count,
         revenue: @filtered_reservations.where(reservable_id: car.id, status: "confirmed")
-                                      .sum(:total_price) || 0
+                                       .sum(&:total_price) || 0
       }
     end.sort_by { |car| -car[:count] }
   end
@@ -234,8 +234,8 @@ class DashboardsController < ApplicationController
   def set_rental_recent_activities
     # Nouvelles réservations
     new_reservations = @reservations.order(created_at: :desc)
-                                   .limit(3)
-                                   .map do |reservation|
+                                    .limit(3)
+                                    .map do |reservation|
       {
         type: :reservation_new,
         message: "Nouvelle réservation pour #{reservation.reservable.brand} #{reservation.reservable.model}",
@@ -244,23 +244,10 @@ class DashboardsController < ApplicationController
       }
     end
 
-    # Retours de véhicules
-    returned_cars = @reservations.where(status: 'completed')
-                                .order(updated_at: :desc)
-                                .limit(3)
-                                .map do |r|
-      {
-        type: :car_returned,
-        message: "Véhicule retourné : #{r.reservable.brand} #{r.reservable.model}",
-        time: r.updated_at,
-        icon: "rotate-ccw"
-      }
-    end
-
     # Nouveaux véhicules
     new_cars = @cars.order(created_at: :desc)
-                   .limit(2)
-                   .map do |car|
+                    .limit(2)
+                    .map do |car|
       {
         type: :car_new,
         message: "Nouveau véhicule ajouté : #{car.brand} #{car.model}",
@@ -268,11 +255,6 @@ class DashboardsController < ApplicationController
         icon: "plus-circle"
       }
     end
-
-    @recent_activities = (new_reservations + returned_cars + new_cars)
-                        .sort_by { |activity| activity[:time] }
-                        .reverse
-                        .take(8)
   end
 
   # ==================== TRAVEL AGENCY DASHBOARD ====================
@@ -281,12 +263,12 @@ class DashboardsController < ApplicationController
     @total_trips = @trips.count
 
     @reservations = Reservation.includes(:reservable)
-                              .where(reservable_type: "Trip", reservable_id: @trips.pluck(:id))
+                               .where(reservable_type: "Trip", reservable_id: @trips.pluck(:id))
 
     calculate_travel_metrics
     set_travel_period_data
     set_travel_recent_activities
-    
+
     render "dashboards/travel_agency"
   end
 
@@ -295,47 +277,43 @@ class DashboardsController < ApplicationController
     @confirmed_reservations = @reservations.where(status: "confirmed").count
     @pending_reservations = @reservations.where(status: "pending").count
     @cancelled_reservations = @reservations.where(status: "cancelled").count
-    
-    # Voyages actifs/inactifs
-    @active_trips = @trips.where(status: "active").count
-    @completed_trips = @trips.where(status: "completed").count
-    
+
+    # Sans champ status sur trips, on commente ou supprime les lignes suivantes
+    # @active_trips = @trips.where(status: "active").count
+    # @completed_trips = @trips.where(status: "completed").count
+
     # Revenus
-    @total_revenue = @reservations.where(status: "confirmed").sum(:total_price) || 0
-    @monthly_revenue = @reservations.where(status: "confirmed")
-                                   .where("created_at >= ?", 1.month.ago)
-                                   .sum(:total_price) || 0
+    @reservations = Reservation.where(reservable_type: "Trip", reservable_id: @trips.pluck(:id))
   end
 
   def set_travel_period_data
     period = params[:period] || "week"
-    
-    @filtered_reservations = case period
-                            when "month"
-                              @reservations.where("created_at >= ?", 1.month.ago)
-                            when "year"
-                              @reservations.where("created_at >= ?", 1.year.ago)
-                            else
-                              @reservations.where("created_at >= ?", 1.week.ago)
-                            end
 
-    # Statistiques par voyage
+    @filtered_reservations = case period
+                             when "month"
+                               @reservations.where("created_at >= ?", 1.month.ago)
+                             when "year"
+                               @reservations.where("created_at >= ?", 1.year.ago)
+                             else
+                               @reservations.where("created_at >= ?", 1.week.ago)
+                             end
+
     @reserv_by_trip = @trips.map do |trip|
       {
         title: trip.title,
-        destination: trip.destination,
+        theme: trip.theme,
+        departureCity: trip.departureCity,
+        destinationCity: trip.destinationCity,
         count: @filtered_reservations.where(reservable_id: trip.id).count,
-        revenue: @filtered_reservations.where(reservable_id: trip.id, status: "confirmed")
-                                      .sum(:total_price) || 0
+        revenue: @filtered_reservations.where(reservable_id: trip.id, status: "confirmed").sum(&:total_price) || 0
       }
     end.sort_by { |trip| -trip[:count] }
   end
 
   def set_travel_recent_activities
-    # Nouvelles réservations
     new_reservations = @reservations.order(created_at: :desc)
-                                   .limit(3)
-                                   .map do |reservation|
+                                    .limit(3)
+                                    .map do |reservation|
       {
         type: :reservation_new,
         message: "Nouvelle réservation pour #{reservation.reservable.title}",
@@ -344,23 +322,12 @@ class DashboardsController < ApplicationController
       }
     end
 
-    # Voyages terminés
-    completed_trips = @trips.where(status: 'completed')
-                           .order(updated_at: :desc)
-                           .limit(2)
-                           .map do |trip|
-      {
-        type: :trip_completed,
-        message: "Voyage terminé : #{trip.title}",
-        time: trip.updated_at,
-        icon: "check-circle"
-      }
-    end
+    # Comme pas de status "completed" sur trip, on peut retirer ce bloc ou l'adapter
+    completed_trips = []
 
-    # Nouveaux voyages
     new_trips = @trips.order(created_at: :desc)
-                     .limit(3)
-                     .map do |trip|
+                      .limit(3)
+                      .map do |trip|
       {
         type: :trip_new,
         message: "Nouveau voyage ajouté : #{trip.title}",
@@ -370,9 +337,43 @@ class DashboardsController < ApplicationController
     end
 
     @recent_activities = (new_reservations + completed_trips + new_trips)
-                        .sort_by { |activity| activity[:time] }
-                        .reverse
-                        .take(8)
+                         .sort_by { |activity| activity[:time] }
+                         .reverse
+                         .take(8)
+  end
+
+  def export_trips
+    @trips = @provider.trips.includes(:reservations)
+
+    bom = "\uFEFF"
+    csv_data = CSV.generate(col_sep: ";", force_quotes: true) do |csv|
+      csv << ["Titre", "Thème", "Durée (jours)", "Date départ", "Date retour", "Ville départ", "Ville destination", "Prix (€)", "Réservations totales", "Réservations confirmées", "Revenus (€)"]
+
+      @trips.each do |trip|
+        reservations = Reservation.where(reservable_type: "Trip", reservable_id: trip.id)
+        total_reservations = reservations.count
+        confirmed_reservations = reservations.where(status: "confirmed").count
+        revenue = reservations.where(status: "confirmed").sum(:total_price) || 0
+
+        csv << [
+          trip.title,
+          trip.theme,
+          trip.duration,
+          trip.departureDate,
+          trip.returnDate,
+          trip.departureCity,
+          trip.destinationCity,
+          trip.price,
+          total_reservations,
+          confirmed_reservations,
+          revenue
+        ]
+      end
+    end
+
+    send_data bom + csv_data,
+              filename: "voyages-#{Date.today}.csv",
+              type: "text/csv; charset=utf-8"
   end
 
   # ==================== EXPORT METHODS ====================
@@ -382,14 +383,14 @@ class DashboardsController < ApplicationController
     bom = "\uFEFF"
     csv_data = CSV.generate(col_sep: ";", force_quotes: true) do |csv|
       csv << ["Nom de l'Hôtel", "Adresse", "Nombre de chambres", "Réservations totales", "Réservations confirmées", "Revenus (€)"]
-      
+
       @hotels.each do |hotel|
         room_ids = hotel.rooms.pluck(:id)
         reservations = Reservation.where(reservable_type: "Room", reservable_id: room_ids)
         total_reservations = reservations.count
         confirmed_reservations = reservations.where(status: "confirmed").count
         revenue = reservations.where(status: "confirmed").sum(:total_price) || 0
-        
+
         csv << [
           hotel.name,
           hotel.address,
@@ -412,17 +413,17 @@ class DashboardsController < ApplicationController
     bom = "\uFEFF"
     csv_data = CSV.generate(col_sep: ";", force_quotes: true) do |csv|
       csv << ["Marque", "Modèle", "Statut", "Réservations totales", "Réservations confirmées", "Revenus (€)"]
-      
+
       @cars.each do |car|
         reservations = Reservation.where(reservable_type: "Car", reservable_id: car.id)
         total_reservations = reservations.count
         confirmed_reservations = reservations.where(status: "confirmed").count
         revenue = reservations.where(status: "confirmed").sum(:total_price) || 0
-        
+
         csv << [
           car.brand,
           car.model,
-          car.status,
+          car.available,
           total_reservations,
           confirmed_reservations,
           revenue
@@ -440,18 +441,23 @@ class DashboardsController < ApplicationController
 
     bom = "\uFEFF"
     csv_data = CSV.generate(col_sep: ";", force_quotes: true) do |csv|
-      csv << ["Titre", "Destination", "Statut", "Réservations totales", "Réservations confirmées", "Revenus (€)"]
-      
+      csv << ["Titre", "Thème", "Durée (jours)", "Date départ", "Date retour", "Ville départ", "Ville destination", "Prix (€)", "Réservations totales", "Réservations confirmées", "Revenus (€)"]
+
       @trips.each do |trip|
         reservations = Reservation.where(reservable_type: "Trip", reservable_id: trip.id)
         total_reservations = reservations.count
         confirmed_reservations = reservations.where(status: "confirmed").count
         revenue = reservations.where(status: "confirmed").sum(:total_price) || 0
-        
+
         csv << [
           trip.title,
-          trip.destination,
-          trip.status,
+          trip.theme,
+          trip.duration,
+          trip.departureDate,
+          trip.returnDate,
+          trip.departureCity,
+          trip.destinationCity,
+          trip.price,
           total_reservations,
           confirmed_reservations,
           revenue

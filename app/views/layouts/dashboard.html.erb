@@ -4,130 +4,186 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Dashboard - <%= @provider.provider_type.humanize %>
+    <title>Dashboard - <%= @provider.type_provider.humanize %>
     </title>
     <%= csrf_meta_tags %>
-        <%= csp_meta_tag %>
-
-            <%= stylesheet_link_tag "application" , "data-turbo-track" : "reload" %>
-                <%= javascript_importmap_tags %>
-                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-                        rel="stylesheet">
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag 'tailwind' ,  data: { turbo_track: "reload" } %>
+    <%= stylesheet_link_tag "application" , data: { turbo_track: "reload" } %>
+    <%= javascript_importmap_tags %>
+    <script src="/js/font-awesome.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-50">
     <!-- Sidebar -->
-    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+    <div class="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transition-all duration-300">
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center justify-center h-16 bg-blue-600 text-white">
-                <h1 class="text-xl font-bold">Dashboard</h1>
+            <div class="relative h-24 bg-gradient-to-br from-blue-600 to-blue-800">
+                <div class="absolute inset-0 bg-black/10"></div>
+                <div class="relative flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold tracking-wider text-white">TravelSync</h1>
+                        <div class="mt-1 text-sm font-medium text-blue-100 opacity-80">
+                            <%= @provider.type_provider.humanize %>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 px-4 py-6 space-y-2">
-                <%= link_to provider_dashboard_path,
-                    class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 #{'bg-blue-50 text-blue-600' if current_page?(provider_dashboard_path)}"
-                    do %>
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    Dashboard
+            <nav class="flex-1 px-4 py-6">
+                <div class="space-y-1">
+                    <!-- Dashboard -->
+                    <%= link_to dashboard_provider_path, 
+                        class: "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group #{current_page?(dashboard_provider_path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+                        <div class="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br #{current_page?(dashboard_provider_path) ? 'from-blue-500 to-blue-600' : 'from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300'} transition-colors">
+                            <i class="fas fa-chart-line text-lg #{current_page?(dashboard_provider_path) ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'}"></i>
+                        </div>
+                        <span>Vue d'ensemble</span>
                     <% end %>
+                </div>
 
-                        <% case @provider.provider_type %>
-                            <% when "hotelier" %>
-                                <%= link_to hotels_path,
-                                    class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100" do
-                                    %>
-                                    <i class="fas fa-hotel mr-3"></i>
-                                    Mes Hôtels
-                                    <% end %>
-                                        <%= link_to rooms_path,
-                                            class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100"
-                                            do %>
-                                            <i class="fas fa-bed mr-3"></i>
-                                            Chambres
-                                            <% end %>
-                                                <% when "rental_agency" %>
-                                                    <%= link_to cars_path,
-                                                        class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100"
-                                                        do %>
-                                                        <i class="fas fa-car mr-3"></i>
-                                                        Mes Véhicules
-                                                        <% end %>
-                                                            <% when "travel_agency" %>
-                                                                <%= link_to trips_path,
-                                                                    class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100"
-                                                                    do %>
-                                                                    <i class="fas fa-map-marked-alt mr-3"></i>
-                                                                    Mes Voyages
-                                                                    <% end %>
-                                                                        <% end %>
+                <!-- Services -->
+                <div class="mt-8">
+                    <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Services</h3>
+                    <div class="mt-4 space-y-1">
+                        <% case @provider.type_provider %>
+                        <% when "hotelier" %>
+                            <%= link_to provider_hotels_path,
+                                class: "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group #{current_page?(provider_hotels_path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+                                <div class="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br #{current_page?(provider_hotels_path) ? 'from-blue-500 to-blue-600' : 'from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300'} transition-colors">
+                                    <i class="fas fa-hotel text-lg #{current_page?(provider_hotels_path) ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'}"></i>
+                                </div>
+                                <span>Mes Hôtels</span>
+                            <% end %>
+                        <% when "rental_agency" %>
+                            <%= link_to provider_cars_path,
+                                class: "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group #{current_page?(provider_cars_path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+                                <div class="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br #{current_page?(provider_cars_path) ? 'from-blue-500 to-blue-600' : 'from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300'} transition-colors">
+                                    <i class="fas fa-car text-lg #{current_page?(provider_cars_path) ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'}"></i>
+                                </div>
+                                <span>Mes Véhicules</span>
+                            <% end %>
+                        <% when "travel_agency" %>
+                        <%= link_to provider_trips_path,
+                            class: "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group #{current_page?(provider_cars_path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+                            <div
+                                class="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br #{current_page?(provider_cars_path) ? 'from-blue-500 to-blue-600' : 'from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300'} transition-colors">
+                                <i class="fas fa-car text-lg #{current_page?(provider_cars_path) ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'}"></i>
+                            </div>
+                            <span>Mes voyages</span>    
+                        <% end %>
+                        <% end %>
+                    </div>
+                </div>
 
-                                                                            <%= link_to reservations_path,
-                                                                                class: "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100"
-                                                                                do %>
-                                                                                <i
-                                                                                    class="fas fa-calendar-check mr-3"></i>
-                                                                                Réservations
-                                                                                <% end %>
+                <!-- Gestion -->
+                <div class="mt-8">
+                    <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</h3>
+                    <div class="mt-4 space-y-1">
+                        <%= link_to provider_reservations_path,
+                            class: "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group #{current_page?(provider_reservations_path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+                            <div class="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br #{current_page?(provider_reservations_path) ? 'from-blue-500 to-blue-600' : 'from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300'} transition-colors">
+                                <i class="fas fa-calendar-check text-lg #{current_page?(provider_reservations_path) ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'}"></i>
+                            </div>
+                            <span>Réservations</span>
+                        <% end %>
+                    </div>
+                </div>
             </nav>
 
             <!-- User Menu -->
-            <div class="px-4 py-4 border-t">
-                <div class="flex items-center">
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900">
-                            <%= current_user.name %>
-                        </p>
-                        <p class="text-xs text-gray-500">
-                            <%= @provider.provider_type.humanize %>
-                        </p>
-                    </div>
-                    <%= link_to destroy_user_session_path, method: :delete,
-                        class: "ml-3 p-2 text-gray-400 hover:text-gray-600" do %>
-                        <i class="fas fa-sign-out-alt"></i>
+            <div class="p-4 mt-auto">
+                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                            <%= current_user.first_name[0] %>
+                        </div>
+                        <div class="flex-1 ml-4">
+                            <p class="text-sm font-semibold text-gray-900">
+                                <%= current_user.first_name %>
+                            </p>
+                            <p class="text-xs font-medium text-gray-500 mt-0.5">
+                                <%= @provider.type_provider.humanize %>
+                            </p>
+                        </div>
+                        <%= link_to destroy_user_session_path, method: :delete,
+                            class: "p-2 text-gray-400 hover:text-red-600 transition-colors duration-200",
+                            title: "Se déconnecter" do %>
+                            <i class="fas fa-sign-out-alt text-lg"></i>
                         <% end %>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="ml-64">
+    <div class="ml-72">
         <!-- Header -->
-        <header class="bg-white shadow">
-            <div class="px-6 py-4">
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="px-8 py-6">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-semibold text-gray-900">
-                        Dashboard <%= @provider.provider_type.humanize %>
-                    </h1>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            Dashboard <%= @provider.type_provider.humanize %>
+                        </h1>
+                        <p class="mt-1 text-sm text-gray-500">Bienvenue sur votre espace de gestion</p>
+                    </div>
 
                     <!-- Period Filter -->
-                    <div class="flex items-center space-x-3">
-                        <%= form_with url: provider_dashboard_path, method: :get, local: true,
-                            class: "flex items-center space-x-2" do |f| %>
-                            <%= f.select :period, options_for_select([ ['Cette semaine', 'week' ], ['Ce mois', 'month'
-                                ], ['Cette année', 'year' ] ], params[:period] || 'week' ), {}, {
-                                class: "px-3 py-2 border border-gray-300 rounded-md text-sm" ,
-                                onchange: "this.form.submit();" } %>
-                                <% end %>
+                    <div class="flex items-center space-x-4">
+                        <%= form_with url: dashboard_provider_path, method: :get, local: true,
+                            class: "flex items-center" do |f| %>
+                            <div class="relative">
+                                <%= f.select :period, options_for_select([
+                                    ['Cette semaine', 'week'],
+                                    ['Ce mois', 'month'],
+                                    ['Cette année', 'year']
+                                ], params[:period] || 'week'), {}, {
+                                    class: "appearance-none pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200",
+                                    onchange: "this.form.submit();"
+                                } %>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        <% end %>
 
-                                    <%= link_to export_data_path,
-                                        class: "inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
-                                        do %>
-                                        <i class="fas fa-download mr-2"></i>
-                                        Exporter
-                                        <% end %>
+                        <%= link_to dashboard_provider_export_path,
+                            class: "inline-flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-sm transition-all duration-200" do %>
+                            <i class="fas fa-download mr-2"></i>
+                            Exporter
+                        <% end %>
                     </div>
                 </div>
             </div>
         </header>
 
         <!-- Content -->
-        <main class="p-6">
-            <%= yield %>
+        <main class="p-8 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto">
+                <%= yield %>
+            </div>
         </main>
     </div>
+
+    <!-- Scripts for animations -->
+    <script>
+        document.addEventListener('turbo:load', function() {
+            // Add hover effects to navigation
+            const navItems = document.querySelectorAll('nav a');
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.transform = 'translateX(4px)';
+                });
+                item.addEventListener('mouseleave', () => {
+                    item.style.transform = 'translateX(0)';
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

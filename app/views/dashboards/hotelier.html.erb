@@ -1,59 +1,586 @@
-<!-- Début Container Hôtelier avec style "Rooms" -->
-<div class="container-xxl py-5">
-  <div class="container">
-    <h1 class="text-center mb-4 fw-bold fs-3 text-primary">Bienvenue dans votre espace Hôtelier</h1>
-    <div class="mb-4 text-muted text-center">
-      <p><strong>Prestataire :</strong> <%= @provider.type_provider %></p>
-      <p><strong>Entreprise :</strong> <%= @provider.business %></p>
-      <p><strong>Adresse :</strong> <%= @provider.address %></p>
-      <p><strong>Téléphone :</strong> <%= @current_user.phone %></p>
+<div class="max-w-7xl mx-auto p-8">
+  <!-- En-tête du tableau de bord -->
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
+    <div class="flex-1">
+      <div class="flex items-center mb-2 space-x-3">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mr-4">
+            <i class="fas fa-hotel text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              Tableau de bord Hôtelier
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">
+              <%= Time.current.strftime("%A %d %B %Y") %>
+            </p>
+          </div>
+        </div>
+        <span class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-50 rounded-full border border-blue-100">
+          <%= pluralize(@hotels.count, 'hôtel', 'hôtels') %>
+        </span>
+      </div>
+      <p class="text-gray-600 flex items-center">
+        <i class="fas fa-chart-line text-blue-500 mr-2"></i>
+        Gérez vos hôtels et suivez vos performances en temps réel
+      </p>
     </div>
-    <div class="text-center mb-5">
-      <%= link_to "Ajouter un hôtel", new_provider_hotel_path, class: "btn btn-primary rounded-pill px-4 py-2" %>
+
+    <!-- Filtres par période -->
+    <div class="flex items-center space-x-2 bg-gray-50 p-1 rounded-xl">
+      <%= link_to dashboard_provider_path(period: 'week'),
+        class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'week' || params[:period].nil? ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+        <i class="fas fa-calendar-week mr-2"></i>
+        Semaine
+      <% end %>
+      
+      <%= link_to dashboard_provider_path(period: 'month'),
+        class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+        <i class="fas fa-calendar-alt mr-2"></i>
+        Mois
+      <% end %>
+      
+      <%= link_to dashboard_provider_path(period: 'year'),
+        class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'year' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+        <i class="fas fa-calendar mr-2"></i>
+        Année
+      <% end %>
     </div>
-    <% if @hotels.any? %>
-      <div class="row g-4 justify-content-center">
-        <% @hotels.each do |hotel| %>
-          <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-            <div class="card shadow rounded overflow-hidden h-100">
-              <% if hotel.images.attached? %>
-                <%= image_tag hotel.images.first.variant(resize_to_limit: [400, 250]).processed,
-                      class: "card-img-top rounded-top img-fluid",
-                      alt: hotel.name %>
-              <% else %>
-                <%= image_tag "/img/radison.jpg", class: "card-img-top rounded-top img-fluid", alt: "Image par défaut" %>
-              <% end %>
-              <div class="card-body p-4 text-center">
-                <h5 class="card-title fw-bold mb-2"><%= hotel.name %></h5>
-                <p class="text-muted mb-2"><i class="bi bi-geo-alt-fill me-1 text-primary"></i><%= hotel.city %></p>
-                <p class="text-warning mb-3" style="font-size: 1.1rem;">
-                  <% hotel.stars.times do %>
-                    <i class="fa fa-star"></i>
-                  <% end %>
-                </p>
-                <p class="text-body mb-3"><%= truncate(hotel.description, length: 80) %></p>
-              </div>
-              <div class="card-footer bg-white border-0 d-flex justify-content-around pb-4">
-                <%= link_to provider_hotel_path(hotel), class: "btn btn-sm btn-outline-primary rounded-pill px-4 py-2" do %>
-                  <i class="bi bi-eye-fill me-1"></i> Voir
-                <% end %>
-                <%= link_to edit_provider_hotel_path(hotel), class: "btn btn-sm btn-outline-warning rounded-pill px-4 py-2" do %>
-                  <i class="bi bi-pencil-fill me-1"></i> Modifier
-                <% end %>
-                <%= button_to provider_hotel_path(hotel),
-                      method: :delete,
-                      data: { confirm: "Supprimer cet hôtel ?" },
-                      class: "btn btn-sm btn-outline-danger rounded-pill px-4 py-2" do %>
-                  <i class="bi bi-trash-fill me-1"></i> Supprimer
-                <% end %>
-              </div>
+  </div>
+
+  <!-- Cartes de métriques principales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Revenus -->
+    <div class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-yellow-100">
+      <!-- Arrière-plan décoratif -->
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-50 to-yellow-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110"></div>
+      
+      <!-- Contenu -->
+      <div class="relative p-5">
+        <!-- En-tête -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-euro-sign text-xl"></i>
+          </div>
+          <% if @revenue_growth && @revenue_growth > 0 %>
+            <div class="flex items-center space-x-1">
+              <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+              <span class="text-xs font-medium text-green-500 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                +<%= @revenue_growth.round(1) %>%
+              </span>
             </div>
+          <% end %>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Revenus Totaux</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= number_to_currency(@total_revenue, unit: "€", precision: 0) %>
+          </h3>
+        </div>
+        
+        <!-- Pied -->
+        <div class="flex items-center justify-between text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-chart-bar mr-2 text-yellow-500"></i>
+            <span>Ce mois</span>
+          </div>
+          <span class="font-medium text-gray-900">
+            <%= number_to_currency(@monthly_revenue, unit: "€", precision: 0) %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Réservations -->
+    <div class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-blue-100">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110"></div>
+      
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-calendar-check text-xl"></i>
+          </div>
+          <div class="flex space-x-2">
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-green-500"></span>
+              <span class="text-xs font-medium text-gray-600"><%= @confirmed_reservations %></span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+              <span class="text-xs font-medium text-gray-600"><%= @pending_reservations %></span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Total Réservations</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= @total_reservations %>
+          </h3>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+            <span><%= @confirmed_reservations %> conf.</span>
+          </div>
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-clock text-yellow-500 mr-2"></i>
+            <span><%= @pending_reservations %> atten.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hôtels -->
+    <div class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-green-100">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-green-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110"></div>
+      
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-building text-xl"></i>
+          </div>
+          <span class="text-xs font-medium bg-green-50 text-green-600 px-2.5 py-1 rounded-full border border-green-100">
+            <%= @total_rooms %> chambres
+          </span>
+        </div>
+        
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Établissements</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= @hotels.count %> hôtels
+          </h3>
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-bed mr-2 text-green-500"></i>
+            <span>Moyenne par hôtel</span>
+          </div>
+          <span class="font-medium text-gray-900">
+            <%= (@total_rooms.to_f / @hotels.count).round(1) %> chambres
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taux d'occupation -->
+    <div class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-pink-100">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110"></div>
+      
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-chart-line text-xl"></i>
+          </div>
+          <div class="flex items-center space-x-1">
+            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+            <span class="text-xs font-medium text-green-500 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+              +2.5%
+            </span>
+          </div>
+        </div>
+        
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Taux d'occupation</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= @occupancy_rate %>%
+          </h3>
+        </div>
+        
+        <div class="relative">
+          <div class="overflow-hidden h-2 rounded-full bg-pink-100/50">
+            <div class="h-full rounded-full bg-pink-500 transition-all duration-500" style="width: <%= @occupancy_rate %>%"></div>
+          </div>
+          <div class="flex items-center justify-between mt-2 text-xs font-medium">
+            <span class="text-gray-500">Progression</span>
+            <span class="text-pink-600"><%= @occupancy_rate %>%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques et statistiques -->
+  <div class="mb-8">
+    <!-- Dernières réservations -->
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div class="p-5 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+            <i class="fas fa-calendar-alt text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">Dernières Réservations</h2>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+      </div>
+      <div class="p-5">
+        <div class="space-y-3">
+          <% if @reservations.any? %>
+            <% @reservations.order(created_at: :desc).limit(5).each do |reservation| %>
+              <% room = @rooms[reservation.reservable_id] %>
+              <div class="group flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 border border-gray-100">
+                <!-- Indicateur de statut -->
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center <%= case reservation.status
+                    when 'confirmed' then 'bg-green-50 text-green-600'
+                    when 'pending' then 'bg-yellow-50 text-yellow-600'
+                    when 'cancelled' then 'bg-red-50 text-red-600'
+                    when 'rejected' then 'bg-red-50 text-red-600'
+                    when 'paid' then 'bg-blue-50 text-blue-600'
+                    else 'bg-gray-50 text-gray-600'
+                    end %> group-hover:scale-105 transition-transform duration-200">
+                    <i class="fas <%= case reservation.status
+                      when 'confirmed' then 'fa-check'
+                      when 'pending' then 'fa-clock'
+                      when 'cancelled' then 'fa-times'
+                      when 'rejected' then 'fa-ban'
+                      when 'paid' then 'fa-money-bill-wave'
+                      else 'fa-question'
+                      end %> text-lg"></i>
+                    <span class="sr-only"><%= reservation.status.humanize %></span>
+                  </div>
+                </div>
+
+                <!-- Informations de la réservation -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      <%= reservation.user.first_name %>
+                    </p>
+                    <span class="text-xs text-gray-500">
+                      <%= time_ago_in_words(reservation.created_at) %>
+                    </span>
+                  </div>
+                  
+                  <div class="flex items-center space-x-3 text-sm text-gray-500">
+                    <span class="flex items-center space-x-1">
+                      <i class="fas fa-hotel text-gray-400"></i>
+                      <span class="truncate"><%= room&.hotel&.name %></span>
+                    </span>
+                    <span class="text-gray-300">•</span>
+                    <span class="flex items-center space-x-1">
+                      <i class="fas fa-bed text-gray-400"></i>
+                      <span><%= room&.type_room %></span>
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between mt-2">
+                    <div class="flex items-center text-xs space-x-2">
+                      <span class="flex items-center space-x-1 text-gray-500">
+                        <i class="fas fa-calendar text-gray-400"></i>
+                        <span><%= reservation.start_date.strftime("%d/%m") %> - <%= reservation.end_date.strftime("%d/%m") %></span>
+                      </span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">
+                      <%= number_to_currency(reservation.total_price, unit: "€") %>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action -->
+                <div class="flex-shrink-0">
+                  <%= link_to "#", class: "p-2 text-gray-400 hover:text-blue-600 transition-colors duration-200" do %>
+                    <i class="fas fa-chevron-right"></i>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Voir plus -->
+            <%= link_to provider_reservations_path, 
+              class: "mt-4 flex items-center justify-center py-3 px-4 text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 group rounded-lg hover:bg-gray-50" do %>
+              <span>Voir toutes les réservations</span>
+              <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform duration-200"></i>
+            <% end %>
+          <% else %>
+            <!-- État vide -->
+            <div class="text-center py-8">
+              <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-alt text-gray-400 text-xl"></i>
+              </div>
+              <h3 class="text-gray-500 text-sm">Aucune réservation pour le moment</h3>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="space-y-8">
+    <!-- Liste des hôtels -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border-b border-gray-200 gap-4">
+        <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-hotel text-gray-400 mr-2"></i>
+          Mes Hôtels
+        </h2>
+        <div class="flex gap-2">
+          <%= link_to new_provider_hotel_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200" do %>
+            <i class="fas fa-plus"></i>
+            Ajouter un hôtel
+            <% end %>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <% if @hotels.any? %>
+          <div class="space-y-6">
+            <!-- En-tête de la section -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Top Hôtels</h3>
+              <p class="text-sm text-gray-500">Les établissements les plus performants de votre collection</p>
+            </div>
+
+            <!-- Liste des top hôtels -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <% @hotels.limit(3).each_with_index do |hotel, index| %>
+                <div class="group relative bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <!-- Badge de classement -->
+                  <div class="absolute top-4 left-4 z-20">
+                    <div class="flex items-center gap-2">
+                      <span class="px-3 py-1 text-xs font-medium bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-full shadow-md">
+                        #<%= index + 1 %> Top Hôtel
+                      </span>
+                      <span class="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full shadow-sm">
+                        Actif
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Image de couverture avec overlay -->
+                  <!-- Image de couverture avec overlay amélioré -->
+                  <div class="relative h-56 overflow-hidden bg-gray-100">
+                    <% if hotel.images.any? %>
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10"></div>
+                      <%= image_tag hotel.images.first, alt: hotel.name, 
+                          class: "w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 filter group-hover:brightness-110" %>
+                    <% else %>
+                      <div class="w-full h-full bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+                        <div class="p-6 rounded-full bg-white/30 backdrop-blur-sm">
+                          <i class="fas fa-hotel text-4xl text-blue-500/80"></i>
+                        </div>
+                      </div>
+                    <% end %>
+
+                    <!-- Statistiques sur l'image -->
+                    <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center z-20">
+                      <div class="px-3 py-2 rounded-lg bg-white/90 backdrop-blur-sm shadow-sm">
+                        <div class="flex items-center gap-3">
+                          <div class="flex items-center">
+                            <i class="fas fa-bed text-blue-500 mr-1.5"></i>
+                            <span class="text-sm font-medium text-gray-900"><%= hotel.rooms.count %> chambres</span>
+                          </div>
+                          <div class="w-px h-4 bg-gray-200"></div>
+                          <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-1.5"></i>
+                            <span class="text-sm font-medium text-gray-900"><%= hotel.stars %>/5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="p-6">
+                    <!-- En-tête avec style amélioré -->
+                    <div class="mb-4">
+                      <div class="flex items-start justify-between">
+                        <div>
+                          <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-200">
+                            <%= hotel.name %>
+                          </h3>
+                          <p class="text-sm text-gray-600 flex items-center">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                            <%= hotel.address %>
+                          </p>
+                        </div>
+                        <div class="flex items-center">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                            Premium
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Statistiques avec design moderne -->
+                    <div class="grid grid-cols-2 gap-4 py-4 border-t border-gray-50">
+                      <% hotel_reservations = Reservation.where(reservable_type: "Room", reservable_id: hotel.rooms.pluck(:id)) %>
+                      <% confirmed_reservations = hotel_reservations.where(status: "confirmed").count %>
+                      <% pending_reservations = hotel_reservations.where(status: "pending").count %>
+                      
+                      <!-- Chambres disponibles -->
+                      <div class="p-3 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 group/stat relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/10 to-transparent rounded-full -mr-8 -mt-8"></div>
+                        <div class="relative">
+                          <div class="flex items-center justify-between mb-1">
+                            <p class="text-sm font-medium text-gray-600">Chb.</p>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                              Total
+                            </span>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <p class="text-2xl font-bold text-purple-600">
+                              <%= hotel.rooms.count %>
+                            </p>
+                            <div class="text-purple-400">
+                              <i class="fas fa-bed text-xl"></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Réservations -->
+                      <div class="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 group/stat relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full -mr-8 -mt-8"></div>
+                        <div class="relative">
+                          <div class="flex items-center justify-between mb-1">
+                            <p class="text-sm font-medium text-gray-600">Réserv.</p>
+                            <div class="flex gap-1">
+                              <span class="w-2 h-2 rounded-full bg-green-500" title="Confirmées"></span>
+                              <span class="w-2 h-2 rounded-full bg-yellow-500" title="En attente"></span>
+                            </div>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <p class="text-2xl font-bold text-blue-600">
+                              <%= hotel_reservations.count %>
+                            </p>
+                            <div class="text-xs space-x-2">
+                              <span class="text-green-600"><%= confirmed_reservations %> conf.</span>
+                              <span class="text-yellow-600"><%= pending_reservations %> att.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Actions avec style compact -->
+                    <div class="pt-4 border-t border-gray-100 flex justify-end gap-2">
+                      <%= link_to provider_hotel_path(hotel),
+                        class: "inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 hover:text-blue-600 border border-gray-200 transition-all duration-200 group" do %>
+                        <i class="fas fa-eye text-sm mr-1.5 group-hover:text-blue-500"></i>
+                        Détails
+                      <% end %>
+                      <%= link_to edit_provider_hotel_path(hotel),
+                        class: "inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg shadow-sm hover:shadow transition-all duration-200 group" do %>
+                        <i class="fas fa-edit text-sm mr-1.5 group-hover:animate-pulse"></i>
+                        Modifier
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Voir tous les hôtels -->
+            <% if @hotels.count > 3 %>
+              <div class="text-center">
+                <%= link_to provider_hotels_path, 
+                  class: "inline-flex items-center px-6 py-3 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 group" do %>
+                  <span>Voir tous les hôtels (<%= @hotels.count %>)</span>
+                  <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform duration-200"></i>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+            <div class="text-center py-12 text-gray-500">
+              <i class="fas fa-hotel text-5xl mb-4 opacity-50"></i>
+              <h3 class="text-lg font-medium text-gray-700 mb-2">Aucun hôtel enregistré</h3>
+              <p class="mb-4">Commencez par ajouter votre premier hôtel</p>
+              <%= link_to new_hotel_path,
+                class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200" do %>
+                <i class="fas fa-plus"></i>
+                Ajouter un hôtel
+                <% end %>
+            </div>
+            <% end %>
+      </div>
+    </div>
+
+    <!-- Activités récentes -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-clock text-gray-400 mr-2"></i>
+          Activités Récentes
+        </h2>
+      </div>
+
+      <div class="p-6 max-h-[32rem] overflow-y-auto custom-scrollbar">
+        <% if @recent_activities.any? %>
+          <div class="relative">
+            <!-- Ligne de temps avec dégradé -->
+            <div class="absolute top-0 bottom-0 left-5 w-px bg-gradient-to-b from-blue-100 via-purple-100 to-pink-100"></div>
+
+            <div class="space-y-6">
+              <% @recent_activities.each do |activity| %>
+                <div class="flex items-start gap-6 group">
+                  <!-- Indicateur avec animation et ombre -->
+                  <div class="relative z-10">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm shadow-md <%= case activity[:type] 
+                      when 'reservation_new' then 'bg-gradient-to-br from-blue-500 to-blue-600 text-white ring-8 ring-blue-100'
+                      when 'reservation_confirmed' then 'bg-gradient-to-br from-emerald-500 to-green-600 text-white ring-8 ring-green-100'
+                      when 'room_new' then 'bg-gradient-to-br from-amber-500 to-yellow-600 text-white ring-8 ring-yellow-100'
+                      else 'bg-gradient-to-br from-purple-500 to-purple-600 text-white ring-8 ring-purple-100'
+                      end %> transform group-hover:scale-110 transition-all duration-200">
+                      <i class="fas fa-<%= activity[:icon] %>"></i>
+                    </div>
+                  </div>
+
+                  <!-- Contenu avec effet de verre -->
+                  <div class="flex-1 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-100 p-4 group-hover:border-blue-200 group-hover:shadow-md transition-all duration-200">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <p class="text-sm text-gray-900 font-medium">
+                          <%= activity[:message] %>
+                        </p>
+                        <div class="flex items-center mt-2 space-x-4">
+                          <span class="text-xs text-gray-500 flex items-center bg-gray-50/80 px-2 py-1 rounded-full">
+                            <i class="fas fa-clock mr-1"></i>
+                            <%= time_ago_in_words(activity[:time]) %>
+                          </span>
+                          <% if activity[:type] == 'reservation_new' || activity[:type] == 'reservation_confirmed' %>
+                            <span class="text-xs px-3 py-1 rounded-full font-medium <%= 
+                              if activity[:type] == 'reservation_confirmed'
+                                'bg-gradient-to-r from-emerald-500 to-green-600 text-white'
+                              else
+                                'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                              end %>">
+                              <%= activity[:type] == 'reservation_confirmed' ? 'Confirmée' : 'Nouvelle' %>
+                            </span>
+                          <% end %>
+                        </div>
+                      </div>
+                      
+                      <% if activity[:type] == 'reservation_new' || activity[:type] == 'reservation_confirmed' %>
+                        <%= link_to "#", class: "p-2 text-gray-400 hover:text-blue-600 transition-colors duration-200" do %>
+                          <i class="fas fa-chevron-right"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-clock text-gray-400 text-xl"></i>
+            </div>
+            <h3 class="text-gray-900 font-medium mb-1">Aucune activité récente</h3>
+            <p class="text-gray-500 text-sm">Les activités apparaîtront ici une fois disponibles</p>
           </div>
         <% end %>
       </div>
-    <% else %>
-      <p class="text-center text-muted fst-italic">Vous n'avez encore enregistré aucun hôtel.</p>
-    <% end %>
+    </div>
   </div>
 </div>
-<!-- Fin Container Hôtelier -->

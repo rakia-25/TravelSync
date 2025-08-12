@@ -1,8 +1,13 @@
 class Provider::CarsController < ApplicationController
 layout "dashboard"
   before_action :authenticate_user!
+   before_action :set_provider
   before_action :check_rental_agency
   before_action :set_car, only: [:show, :edit, :update, :destroy]
+  
+  def index
+    @cars = current_user.provider.cars.order(created_at: :desc)
+  end
 
   def show
   end
@@ -42,9 +47,14 @@ layout "dashboard"
     @car = current_user.provider.cars.find(params[:id])
   end
 
+
   def car_params
-    params.require(:car).permit(:brand, :name, :price, :options, :available, :model)
+    params.require(:car).permit(:brand, :name, :price, :options, :available, :model, images: [])
   end
+  def set_provider
+            @provider = current_user.provider
+  end
+
   def check_rental_agency
 
     if current_user.provider.nil?

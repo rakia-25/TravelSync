@@ -1,1 +1,29 @@
-<%= render 'form', car: @car %>
+<!-- Vue new.html.erb pour les voitures -->
+<div class="max-w-4xl mx-auto p-6">
+
+    <!-- En-tête -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-4 mb-6">
+            <%= link_to provider_cars_path,
+                class: "p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors" ,
+                title: "Retour à la liste" do %>
+                <i class="fas fa-arrow-left text-lg"></i>
+                <% end %>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                            <i class="fas fa-car text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Nouveau véhicule</h1>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Ajoutez un nouveau véhicule à votre flotte
+                            </p>
+                        </div>
+                    </div>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <%= render 'form' , car: @car %>
+
+</div>
