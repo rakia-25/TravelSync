@@ -1,0 +1,263 @@
+<div class="max-w-7xl mx-auto p-6">
+
+  <!-- En-tête de la page -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+          <i class="fas fa-hotel text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Mes Hôtels</h1>
+          <p class="text-sm text-gray-500 mt-1">
+            <%= pluralize(@hotels.count, 'établissement', 'établissements') %> au total
+          </p>
+        </div>
+      </div>
+      <%= link_to new_provider_hotel_path, class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+        <i class="fas fa-plus mr-2"></i>
+        Nouvel établissement
+      <% end %>
+    </div>
+
+    <% if @hotels.any? %>
+      <!-- Barre de recherche et filtres -->
+      <div class="px-6 pb-6 border-t border-gray-100 pt-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- Recherche -->
+          <div class="flex-1">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input type="text" 
+                     id="hotelSearch" 
+                     class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" 
+                     placeholder="Rechercher par nom, ville ou services..."
+            </div>
+          </div>
+          <!-- Filtres -->
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+            <select id="starFilter" class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+              <option value="">Toutes les étoiles</option>
+              <% (1..5).each do |stars| %>
+                <option value="<%= stars %>"><%= stars %> étoile<%= 's' if stars > 1 %></option>
+              <% end %>
+            </select>
+            <select id="cityFilter" class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+              <option value="">Toutes les villes</option>
+              <% @hotels.pluck(:city).uniq.compact.sort.each do |city| %>
+                <option value="<%= city %>"><%= city %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @hotels.any? %>
+    <!-- Tableau des hôtels -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr class="bg-gray-50">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Établissement
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Localisation
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Services
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Médias
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="hotelTableBody">
+            <% @hotels.each do |hotel| %>
+              <tr class="hover:bg-gray-50 transition-colors duration-150 hotel-row" 
+                  data-name="<%= hotel.name.downcase %>" 
+                  data-city="<%= hotel.city&.downcase %>" 
+                  data-stars="<%= hotel.stars %>">
+                <!-- Informations de l'hôtel -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12">
+                      <% if hotel.images.attached? %>
+                        <%= image_tag hotel.images.first, class: "h-12 w-12 rounded-lg object-cover shadow-sm" %>
+                      <% else %>
+                        <div class="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                          <i class="fas fa-hotel text-blue-400"></i>
+                        </div>
+                      <% end %>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900 flex items-center gap-2">
+                        <%= hotel.name %>
+                        <div class="flex items-center">
+                          <% hotel.stars.times do %>
+                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="text-sm text-gray-500 line-clamp-1 mt-0.5">
+                        <%= hotel.description %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Localisation -->
+                <td class="px-6 py-4">
+                  <div class="flex items-start gap-2">
+                    <i class="fas fa-map-marker-alt text-gray-400 mt-0.5"></i>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900"><%= hotel.city %></div>
+                      <div class="text-sm text-gray-500 line-clamp-1"><%= hotel.address %></div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Services -->
+                <td class="px-6 py-4">
+                  <div class="flex items-start gap-2">
+                    <i class="fas fa-concierge-bell text-gray-400 mt-0.5"></i>
+                    <div class="text-sm text-gray-500 line-clamp-2">
+                      <%= hotel.service.presence || "Aucun service renseigné" %>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Photos -->
+                <td class="px-6 py-4">
+                  <% if hotel.images.attached? %>
+                    <div class="flex -space-x-2">
+                      <% hotel.images.first(3).each do |image| %>
+                        <div class="h-8 w-8 rounded-full ring-2 ring-white shadow-sm">
+                          <%= image_tag image, class: "h-full w-full rounded-full object-cover" %>
+                        </div>
+                      <% end %>
+                      <% if hotel.images.count > 3 %>
+                        <div class="h-8 w-8 rounded-full ring-2 ring-white bg-gray-50 flex items-center justify-center">
+                          <span class="text-xs font-medium text-gray-600">+<%= hotel.images.count - 3 %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <span class="text-sm text-gray-500 italic">Aucune photo</span>
+                  <% end %>
+                </td>
+
+                <!-- Actions -->
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end space-x-2">
+                    <%= link_to provider_hotel_path(hotel), 
+                        class: "p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors", 
+                        title: "Voir les détails" do %>
+                      <i class="fas fa-eye"></i>
+                    <% end %>
+                    <%= link_to edit_provider_hotel_path(hotel), 
+                        class: "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors", 
+                        title: "Modifier" do %>
+                      <i class="fas fa-edit"></i>
+                    <% end %>
+                    <%= link_to provider_hotel_path(hotel), 
+                        data: { 
+                          turbo_method: :delete, 
+                          turbo_confirm: "Êtes-vous sûr de vouloir supprimer cet hôtel ? Cette action est irréversible." 
+                        },
+                        class: "p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors",
+                        title: "Supprimer" do %>
+                      <i class="fas fa-trash"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% else %>
+    <!-- État vide -->
+    <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+      <div class="w-20 h-20 mx-auto bg-blue-50 rounded-full flex items-center justify-center mb-6">
+        <i class="fas fa-hotel text-blue-500 text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Commencez votre aventure hôtelière</h3>
+      <p class="text-gray-500 mb-6 max-w-md mx-auto">
+        Ajoutez votre premier établissement pour commencer à gérer vos réservations et accueillir vos premiers clients.
+      </p>
+      <%= link_to new_provider_hotel_path, class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+        <i class="fas fa-plus mr-2"></i>
+        Ajouter mon premier hôtel
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<%= content_for :scripts do %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('hotelSearch');
+      const starFilter = document.getElementById('starFilter');
+      const cityFilter = document.getElementById('cityFilter');
+      const hotelRows = document.querySelectorAll('.hotel-row');
+
+      function filterHotels() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedStars = starFilter.value;
+        const selectedCity = cityFilter.value.toLowerCase();
+
+        hotelRows.forEach(row => {
+          const name = row.dataset.name;
+          const city = row.dataset.city || '';
+          const stars = row.dataset.stars;
+
+          const matchesSearch = name.includes(searchTerm) || 
+                              city.includes(searchTerm) || 
+                              row.textContent.toLowerCase().includes(searchTerm);
+          const matchesStars = !selectedStars || stars === selectedStars;
+          const matchesCity = !selectedCity || city === selectedCity;
+
+          row.style.display = matchesSearch && matchesStars && matchesCity ? '' : 'none';
+        });
+
+        // Mettre à jour le style des lignes visibles (pour les bordures)
+        updateVisibleRows();
+      }
+
+      function updateVisibleRows() {
+        const visibleRows = Array.from(hotelRows).filter(row => row.style.display !== 'none');
+        visibleRows.forEach((row, index) => {
+          if (index === visibleRows.length - 1) {
+            row.classList.add('border-b-0');
+          } else {
+            row.classList.remove('border-b-0');
+          }
+        });
+      }
+
+      // Événements
+      searchInput.addEventListener('input', filterHotels);
+      starFilter.addEventListener('change', filterHotels);
+      cityFilter.addEventListener('change', filterHotels);
+
+      // Animation du focus sur la recherche
+      searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('ring-2', 'ring-blue-500');
+      });
+      
+      searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('ring-2', 'ring-blue-500');
+      });
+    });
+  </script>
+<% end %>

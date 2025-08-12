@@ -1,42 +1,443 @@
-<div class="container py-5 d-flex justify-content-center">
-  <div class="card shadow p-4 w-100" style="max-width: 600px;">
-    <h2 class="text-center mb-4 fw-bold">Nouvelle voiture</h2>
-    <%= form_with(model: car, url: car.new_record? ? provider_cars_path : provider_car_path(car), local: true, method: car.new_record? ? :post : :patch, html: { multipart: true }) do |form| %>
-      <div class="mb-3">
-        <%= form.label :brand, "Marque", class: "form-label" %>
-        <%= form.text_field :brand, placeholder: "Toyota, Renault...", class: "form-control" %>
+<%= form_with model: [:provider, car], local: true, multipart: true, class: "space-y-8" do |form| %>
+
+  <!-- Messages d'erreur -->
+  <% if car.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex items-center mb-2">
+        <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+        <h3 class="text-sm font-medium text-red-800">
+          <%= pluralize(car.errors.count, "erreur" ) %> à corriger :
+        </h3>
       </div>
-      <div class="mb-3">
-        <%= form.label :model, "Modèle", class: "form-label" %>
-        <%= form.text_field :model, placeholder: "Corolla, Clio...", class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= form.label :name, "Type", class: "form-label" %>
-        <%= form.text_field :name, placeholder: "Nom visible sur la plateforme", class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= form.label :price, "Prix (FCFA)", class: "form-label" %>
-        <%= form.number_field :price, step: 1000, placeholder: "Ex: 15000", class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= form.label :options, "Options", class: "form-label" %>
-        <%= form.text_field :options, placeholder: "Climatisation, Wi-Fi...", class: "form-control" %>
-      </div>
-      <div class="form-check mb-4">
-        <%= form.check_box :available, class: "form-check-input", id: "car_available" %>
-        <%= form.label :available, "Disponible ?", class: "form-check-label", for: "car_available" %>
-      </div>
-      <div class="col-12">
-        <label class="form-label">Photos de la voiture</label>
-        <%= form.file_field :images, multiple: true, direct_upload: true, class: "form-control" %>
-      </div>
-      <div class="d-grid">
-        <%= form.submit "Enregistrer", class: "btn btn-success" %>
-      </div>
-    <% end %>
-    <br>
-    <div class="d-grid">
-      <%= link_to "Retour", dashboard_provider_path, class: "btn btn-outline-secondary" %>
+      <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+        <% car.errors.full_messages.each do |message| %>
+          <li>
+            <%= message %>
+          </li>
+          <% end %>
+      </ul>
     </div>
-  </div>
-</div>
+    <% end %>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Colonne principale -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- Informations générales -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-info-circle text-green-600 mr-2"></i>
+                Informations générales
+              </h2>
+              <p class="text-sm text-gray-500 mt-1">Les informations principales de votre véhicule</p>
+            </div>
+
+            <div class="p-6 space-y-6">
+              <!-- Nom du véhicule -->
+              <div>
+                <%= form.label :name, "Nom du véhicule" , class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <%= form.text_field :name, placeholder: "Ex: Citadine économique, Berline de luxe..." ,
+                    class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    %>
+                    <p class="text-xs text-gray-500 mt-1">Optionnel - Si non renseigné, la marque + modèle sera utilisé
+                    </p>
+              </div>
+
+              <!-- Marque et Modèle -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <%= form.label :brand, "Marque *" , class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :brand, placeholder: "Ex: Renault, Peugeot, BMW..." ,
+                      class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , required: true %>
+                </div>
+
+                <div>
+                  <%= form.label :model, "Modèle *" , class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :model, placeholder: "Ex: Clio, 308, Série 3..." ,
+                      class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , required: true %>
+                </div>
+              </div>
+
+              <!-- Prix -->
+              <div>
+                <%= form.label :price, "Prix par jour (€) *" , class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <i class="fas fa-euro-sign text-gray-400"></i>
+                    </div>
+                    <%= form.number_field :price, step: 0.01, min: 0, placeholder: "49.99" ,
+                      class: "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , required: true %>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">Prix de location par jour</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options et équipements -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-cogs text-green-600 mr-2"></i>
+                Options et équipements
+              </h2>
+              <p class="text-sm text-gray-500 mt-1">Décrivez les options et équipements de votre véhicule</p>
+            </div>
+
+            <div class="p-6">
+              <%= form.label :options, "Options" , class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= form.text_area :options, rows: 6,
+                  placeholder: "Ex: Climatisation, GPS intégré, Bluetooth, Régulateur de vitesse, Sièges cuir, Toit ouvrant...\n\nVous pouvez détailler ici tous les équipements et options disponibles dans ce véhicule." ,
+                  class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-vertical"
+                  %>
+                  <p class="text-xs text-gray-500 mt-1">Listez les équipements, options et caractéristiques du véhicule
+                  </p>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-images text-green-600 mr-2"></i>
+                Photos du véhicule
+              </h2>
+              <p class="text-sm text-gray-500 mt-1">Ajoutez ou modifiez les photos de votre véhicule</p>
+            </div>
+
+            <div class="p-6">
+              <!-- Images actuelles -->
+              <% if car.persisted? && car.images.attached? && car.images.any? %>
+                <div class="mb-6">
+                  <p class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-images text-green-600 mr-2"></i>
+                    Images actuelles (<%= car.images.count %>)
+                  </p>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="currentImages">
+                    <% car.images.each_with_index do |image, index| %>
+                      <div class="relative group image-item" data-image-id="<%= image.id %>">
+                        <%= image_tag image, class: "w-full h-24 object-cover rounded-lg shadow-sm" %>
+                          <div
+                            class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                            <button type="button"
+                              class="p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 transform scale-90 hover:scale-100"
+                              onclick="removeImage(<%= image.id %>, this)" title="Supprimer cette image">
+                              <i class="fas fa-times text-sm"></i>
+                            </button>
+                          </div>
+                          <% if index==0 %>
+                            <div class="absolute top-2 left-2">
+                              <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                                Principal
+                              </span>
+                            </div>
+                            <% end %>
+                      </div>
+                      <% end %>
+                  </div>
+                </div>
+                <% end %>
+
+                  <!-- Zone d'upload pour nouvelles images -->
+                  <%= form.label :images, "Ajouter de nouvelles images" ,
+                    class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <div
+                      class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-400 transition-colors">
+                      <div class="space-y-2 text-center">
+                        <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl"></i>
+                        <div class="text-sm text-gray-600">
+                          <%= form.file_field :images, multiple: true, accept: "image/*" , class: "sr-only" ,
+                            id: "images_upload" %>
+                            <label for="images_upload" class="cursor-pointer">
+                              <span class="text-green-600 font-medium hover:text-green-500">Cliquez pour
+                                télécharger</span>
+                              ou glissez-déposez vos nouvelles images
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, JPEG jusqu'à 10MB chacune</p>
+                      </div>
+                    </div>
+
+                    <!-- Aperçu des nouvelles images à ajouter -->
+                    <div id="newImagesPreview" class="mt-4 hidden">
+                      <p class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-plus text-green-600 mr-2"></i>
+                        Nouvelles images à ajouter
+                      </p>
+                      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="previewGrid">
+                        <!-- Les aperçus seront ajoutés ici par JavaScript -->
+                      </div>
+                    </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+
+          <!-- Paramètres -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-sliders-h text-green-600 mr-2"></i>
+                Paramètres
+              </h2>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <!-- Disponibilité -->
+              <div>
+                <label class="flex items-center">
+                  <%= form.check_box :available,
+                    class: "h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500" %>
+                    <span class="ml-2 text-sm text-gray-700">Véhicule disponible à la location</span>
+                </label>
+                <p class="text-xs text-gray-500 mt-1">Décochez si le véhicule est temporairement indisponible</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistiques rapides (si en mode edit) -->
+          <% if car.persisted? %>
+            <div class="bg-blue-50 rounded-xl p-6">
+              <div class="flex items-start">
+                <i class="fas fa-chart-line text-blue-600 mt-0.5 mr-3"></i>
+                <div>
+                  <h3 class="text-sm font-medium text-blue-900 mb-2">Aperçu</h3>
+                  <ul class="text-sm text-blue-800 space-y-1">
+                    <li>• Créé il y a <%= time_ago_in_words(car.created_at) %>
+                    </li>
+                    <li>• <%= car.images.attached? ? "#{car.images.count} photo(s)" : "Aucune photo" %>
+                    </li>
+                    <li>• Statut : <%= car.available? ? "Disponible" : "Indisponible" %>
+                    </li>
+                    <li>• Prix : <%= number_to_currency(car.price, unit: '' , precision: 0) %>€/jour</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <% end %>
+
+              <!-- Aide -->
+              <div class="bg-amber-50 rounded-xl p-6">
+                <div class="flex items-start">
+                  <i class="fas fa-lightbulb text-amber-600 mt-0.5 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-medium text-amber-900 mb-2">Conseils de modification</h3>
+                    <ul class="text-sm text-amber-800 space-y-1">
+                      <li>• Les modifications sont sauvegardées immédiatement</li>
+                      <li>• Vous pouvez réorganiser l'ordre des photos</li>
+                      <li>• Pensez à mettre à jour le prix régulièrement</li>
+                      <li>• Les nouvelles photos s'ajoutent aux existantes</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-6">
+                  <div class="space-y-3">
+                    <%= form.button type: :submit,
+                      class: "w-full bg-green-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center" do %>
+                      <i class="fas fa-save mr-2"></i>
+                      Sauvegarder les modifications
+                      <% end %>
+
+
+          
+                            <%= link_to provider_cars_path,
+                              class: "w-full bg-gray-50 text-gray-600 font-medium py-3 px-4 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center block" do %>
+                              Retour à la liste
+                              <% end %>
+                  </div>
+                </div>
+              </div>
+
+        </div>
+      </div>
+      <% end %>
+
+        <%= content_for :scripts do %>
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+              // Variables globales
+              let imagesToRemove = [];
+
+              // Gestion de la suppression d'images existantes
+              window.removeImage = function (imageId, button) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
+                  // Ajouter l'ID à la liste des images à supprimer
+                  imagesToRemove.push(imageId);
+
+                  // Créer un input caché pour passer les IDs au serveur
+                  const hiddenInput = document.createElement('input');
+                  hiddenInput.type = 'hidden';
+                  hiddenInput.name = 'car[remove_images][]';
+                  hiddenInput.value = imageId;
+                  document.querySelector('form').appendChild(hiddenInput);
+
+                  // Supprimer visuellement l'élément
+                  const imageItem = button.closest('.image-item');
+                  imageItem.style.transition = 'all 0.3s ease-out';
+                  imageItem.style.transform = 'scale(0)';
+                  imageItem.style.opacity = '0';
+
+                  setTimeout(() => {
+                    imageItem.remove();
+                    updateImageCounter();
+                  }, 300);
+                }
+              };
+
+              // Mettre à jour le compteur d'images
+              function updateImageCounter() {
+                const remainingImages = document.querySelectorAll('.image-item').length;
+                const counterText = document.querySelector('p:has(+ #currentImages)');
+                if (counterText) {
+                  counterText.innerHTML = `<i class="fas fa-images text-green-600 mr-2"></i>Images actuelles (${remainingImages})`;
+                }
+              }
+
+              // Gestion de l'upload d'images avec aperçu
+              const imageInput = document.getElementById('images_upload');
+              const uploadArea = imageInput.closest('.border-dashed');
+              const previewContainer = document.getElementById('newImagesPreview');
+              const previewGrid = document.getElementById('previewGrid');
+
+              // Drag & Drop
+              ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+              });
+
+              ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+              });
+
+              ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+              });
+
+              uploadArea.addEventListener('drop', handleDrop, false);
+
+              function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+
+              function highlight() {
+                uploadArea.classList.add('border-green-500', 'bg-green-50');
+              }
+
+              function unhighlight() {
+                uploadArea.classList.remove('border-green-500', 'bg-green-50');
+              }
+
+              function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                imageInput.files = files;
+                handleFiles(files);
+              }
+
+              // Changement via input
+              imageInput.addEventListener('change', function (e) {
+                handleFiles(e.target.files);
+              });
+
+              function handleFiles(files) {
+                previewGrid.innerHTML = ''; // Clear previous previews
+
+                if (files.length > 0) {
+                  previewContainer.classList.remove('hidden');
+                  [...files].forEach(previewFile);
+                } else {
+                  previewContainer.classList.add('hidden');
+                }
+              }
+
+              function previewFile(file) {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function () {
+                  const previewItem = document.createElement('div');
+                  previewItem.className = 'relative group';
+                  previewItem.innerHTML = `
+            <img src="${reader.result}" class="w-full h-24 object-cover rounded-lg shadow-sm">
+            <div class="absolute top-2 right-2">
+              <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">Nouvelle</span>
+            </div>
+          `;
+                  previewGrid.appendChild(previewItem);
+                }
+              }
+
+              // Validation du formulaire
+              const form = document.querySelector('form');
+              form.addEventListener('submit', function (e) {
+                const brand = document.querySelector('input[name="car[brand]"]').value.trim();
+                const model = document.querySelector('input[name="car[model]"]').value.trim();
+                const price = document.querySelector('input[name="car[price]"]').value.trim();
+
+                if (!brand || !model || !price) {
+                  e.preventDefault();
+                  alert('Veuillez remplir tous les champs obligatoires (marque, modèle et prix).');
+                  return false;
+                }
+
+                if (parseFloat(price) <= 0) {
+                  e.preventDefault();
+                  alert('Le prix doit être supérieur à 0.');
+                  return false;
+                }
+
+                // Ajouter un indicateur de chargement
+                const submitButton = form.querySelector('input[type="submit"]');
+                const originalText = submitButton.value;
+                submitButton.value = 'Sauvegarde en cours...';
+                submitButton.disabled = true;
+
+                // En cas d'erreur, restaurer le bouton
+                setTimeout(() => {
+                  if (submitButton.disabled) {
+                    submitButton.value = originalText;
+                    submitButton.disabled = false;
+                  }
+                }, 10000);
+              });
+
+              // Animation des sections au chargement
+              const sections = document.querySelectorAll('.bg-white, .bg-blue-50, .bg-amber-50');
+              sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+
+                setTimeout(() => {
+                  section.style.transition = 'all 0.6s ease-out';
+                  section.style.opacity = '1';
+                  section.style.transform = 'translateY(0)';
+                }, index * 50);
+              });
+
+              // Auto-save draft (optionnel)
+              let autoSaveTimeout;
+              const formInputs = form.querySelectorAll('input, textarea, select');
+
+              formInputs.forEach(input => {
+                input.addEventListener('input', function () {
+                  clearTimeout(autoSaveTimeout);
+                  autoSaveTimeout = setTimeout(() => {
+                    // Ici vous pourriez implémenter une sauvegarde automatique
+                    console.log('Auto-save triggered');
+                  }, 2000);
+                });
+              });
+            });
+          </script>
+          <% end %>

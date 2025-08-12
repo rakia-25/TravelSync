@@ -1,97 +1,396 @@
-<div class="container my-5 bg-white p-5 rounded shadow">
-  <!-- Nom de l'hôtel -->
-  <h1 class="text-center text-primary fw-bold mb-4 fs-2">
-    <%= @hotel.name %>
-  </h1>
-  <% if @hotel.rooms.empty? %>
-    <div class="alert alert-warning d-flex align-items-center rounded shadow-sm mb-4" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-      <div>
-        <strong>Attention :</strong> Cet hôtel n’a pas encore de chambres. Ajoutez-en pour le rendre visible aux clients.
-      </div>
-    </div>
-  <% end %>
-  <!-- Infos principales -->
-  <div class="text-center text-muted mb-4">
-    <p><strong class="text-dark">Ville :</strong> <%= @hotel.city %></p>
-    <p><strong class="text-dark">Adresse :</strong> <%= @hotel.address %></p>
-    <p><strong class="text-dark">Prestataire :</strong> <%= @hotel.provider.business %></p>
-  </div>
-  <!-- Galerie d'images -->
-  <% if @hotel.images.attached? %>
-    <div class="row g-3 mb-5">
-      <% @hotel.images.each do |image| %>
-        <div class="col-md-6">
-          <%= image_tag image.variant(resize_to_limit: [500, 300]), class: "img-fluid rounded shadow-sm" %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
-  
-  <!-- Titre des chambres -->
-  <h2 class="text-center text-dark border-bottom pb-2 mb-4 fs-4 fw-semibold">Chambres disponibles</h2>
-  <div class="text-center mb-5">
-    <%= link_to "Ajouter une chambre", new_provider_hotel_room_path(@hotel), class: "btn btn-primary rounded-pill px-4 py-2" %>
-  </div>
-  <% if @hotel.rooms.any? %>
-    <div class="row g-4">
-      <% @hotel.rooms.each do |room| %>
-        <div class="col-md-6">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="text-primary fw-bold mb-0"><%= room.type_room %></h5>
-                <span class="text-muted small"><%= room.beds %> lit(s)</span>
-              </div>
-              <p class="mb-2">
-                <strong>Services :</strong> <%=room.services %><br>
-                <strong>Prix :</strong> <%= number_to_currency(room.price, unit: "FCFA ") %><br>
-                <strong>Disponible :</strong>
-                <% if room.available %>
-                  <span class="badge bg-success">Oui</span>
-                <% else %>
-                  <span class="badge bg-danger">Non</span>
-                <% end %>
-              </p>
-              <% reservations = room.reservations.where.not(status: "canceled") %>
-              <% if room.available? && reservations.any? %>
-                <div class="alert alert-warning small mt-3">
-                  <strong>📅 Réservée pour :</strong>
-                  <ul class="mb-0 ps-3">
-                    <% reservations.each do |res| %>
-                      <li>
-                        Du <%= l res.start_date %> au <%= l res.end_date %>
-                        <% if res.status == "confirmed" %>
-                          <span class="text-success">(confirmée)</span>
-                        <% else %>
-                          <span class="text-muted">(en attente)</span>
-                        <% end %>
-                      </li>
-                    <% end %>
-                  </ul>
-                </div>
-              <% end %>
-              <% if room.available?%>
-                <div class="d-flex flex-wrap gap-2 mt-3 justify-content-center">
-                  <%= link_to "Modifier", edit_provider_hotel_room_path(@hotel, room),
-                    class: "btn btn-sm btn-primary" %>
-                  <%= button_to "Supprimer", provider_hotel_room_path(@hotel, room),
-                      method: :delete,
-                      data: { confirm: "Supprimer cette chambre ?" },
-                      class: "btn btn-danger btn-sm" %>
+<div class="max-w-7xl mx-auto p-6 space-y-6"></div>
+  <!-- En-tête avec les informations principales -->
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- Galerie d'images -->
+    <div class="p-6 bg-gray-50 rounded-xl">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Galerie photos</h2>
+      <% if @hotel.images.attached? %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <% @hotel.images.each do |image| %>
+            <div class="relative group aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <%= link_to image, target: "_blank", class: "block w-full h-full" do %>
+                <%= image_tag image, class: "w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" %>
+                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i class="fas fa-search-plus text-white text-2xl"></i>
                 </div>
               <% end %>
             </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg">
+          <div class="text-center">
+            <i class="fas fa-images text-gray-400 text-4xl mb-2"></i>
+            <p class="text-gray-500">Aucune photo disponible</p>
           </div>
         </div>
       <% end %>
     </div>
-  <% else %>
-    <p class="text-center text-muted mt-4 fst-italic">
-      Aucune chambre listée pour cet hôtel.
-    </p>
-  <% end %>
 
-  <hr class="my-5">
-  <%= link_to "Retour à la liste des hôtels", dashboard_provider_path, class: "btn btn-outline-primary" %>
+    <!-- Informations de l'hôtel -->
+    <div class="p-6">
+      <div class="flex flex-col sm:flex-row justify-between gap-6">
+        <!-- Informations principales -->
+        <div class="flex-1">
+          <div class="flex items-start gap-4">
+            <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-hotel text-blue-500 text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <h1 class="text-2xl font-bold text-gray-900"><%= @hotel.name %></h1>
+                <div class="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
+                  <% @hotel.stars.times do %>
+                    <i class="fas fa-star text-yellow-400"></i>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                  <i class="fas fa-map-marker-alt text-gray-400"></i>
+                  <%= @hotel.address %>, <%= @hotel.city %>
+                </div>
+                <% if @hotel.gps.present? %>
+                  <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i class="fas fa-location-arrow text-gray-400"></i>
+                    <span><%= @hotel.gps %></span>
+                    <%= link_to "https://www.google.com/maps/search/?api=1&query=#{@hotel.gps}", 
+                        target: "_blank",
+                        class: "text-blue-600 hover:text-blue-700 ml-2" do %>
+                      <i class="fas fa-external-link-alt"></i> Voir sur Google Maps
+                    <% end %>
+                  </div>
+                <% end %>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                  <i class="fas fa-bed text-gray-400"></i>
+                  <span><%= pluralize(@hotel.rooms.count, 'chambre') %></span>
+                  <span class="mx-2">•</span>
+                  <i class="fas fa-calendar-check text-gray-400"></i>
+                  <span><%= pluralize(@hotel.rooms.sum { |room| room.reservations.count }, 'réservation') %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap sm:flex-nowrap items-start gap-3">
+          <div class="dropdown relative group">
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+              <i class="fas fa-cog"></i>
+              Actions
+              <i class="fas fa-chevron-down text-sm ml-1"></i>
+            </button>
+            <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10">
+              <%= link_to edit_provider_hotel_path(@hotel), 
+                  class: "flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-t-lg" do %>
+                <i class="fas fa-edit w-5"></i> Modifier
+              <% end %>
+              <%= link_to new_provider_hotel_room_path(@hotel),
+                  class: "flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600" do %>
+                <i class="fas fa-plus w-5"></i> Ajouter une chambre
+              <% end %>
+              <%= link_to provider_hotel_path(@hotel),
+                  data: { turbo_method: :delete, turbo_confirm: "Êtes-vous sûr de vouloir supprimer cet hôtel ?" },
+                  class: "flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-b-lg" do %>
+                <i class="fas fa-trash w-5"></i> Supprimer
+              <% end %>
+            </div>
+          </div>
+
+          <%= link_to provider_hotels_path, 
+              class: "px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2" do %>
+            <i class="fas fa-arrow-left"></i>
+            Retour à la liste
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Détails de l'hôtel -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+          <!-- Description -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Description</h3>
+            <p class="text-gray-600"><%= @hotel.description %></p>
+          </div>
+          
+          <!-- Identifiant et dates -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Informations administratives</h3>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="fas fa-hashtag text-gray-400"></i>
+                <span>ID: <%= @hotel.id %></span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="fas fa-calendar text-gray-400"></i>
+                <span>Créé le: <%= l(@hotel.created_at, format: :long) %></span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="fas fa-calendar-check text-gray-400"></i>
+                <span>Dernière mise à jour: <%= l(@hotel.updated_at, format: :long) %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Services</h3>
+            <% if @hotel.service.present? %>
+              <div class="flex flex-wrap gap-2">
+                <% @hotel.service.split(',').each do |service| %>
+                  <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                    <%= service.strip %>
+                  </span>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="text-gray-500 italic">Aucun service renseigné</p>
+            <% end %>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Localisation</h3>
+            <div class="bg-gray-100 rounded-lg p-4">
+              <div class="flex items-center gap-3 text-sm text-gray-600">
+                <i class="fas fa-map-marked-alt text-gray-500"></i>
+                <%= @hotel.address %>
+              </div>
+              <% if @hotel.gps.present? %>
+                <div class="flex items-center gap-3 text-sm text-gray-600 mt-2">
+                  <i class="fas fa-location-arrow text-gray-500"></i>
+                  GPS: <%= @hotel.gps %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Statistiques</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="bg-blue-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm text-gray-600">Chb.</div>
+                  <i class="fas fa-bed text-blue-400"></i>
+                </div>
+                <div class="text-xl font-semibold text-blue-600"><%= @hotel.rooms.count %></div>
+                <div class="text-xs text-blue-600 mt-1">
+                  <%= pluralize(@hotel.rooms.count, 'chambre disponible') %>
+                </div>
+              </div>
+              
+              <div class="bg-green-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm text-gray-600">Réserv.</div>
+                  <i class="fas fa-calendar-check text-green-400"></i>
+                </div>
+                <div class="text-xl font-semibold text-green-600">
+                  <%= @hotel.rooms.sum { |room| room.reservations.count } %>
+                </div>
+                <div class="text-xs text-green-600 mt-1">
+                  <%= pluralize(@hotel.rooms.sum { |room| room.reservations.where(status: 'confirmed').count }, 'confirmée') %>
+                </div>
+              </div>
+
+              <div class="bg-purple-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm text-gray-600">Taux</div>
+                  <i class="fas fa-chart-pie text-purple-400"></i>
+                </div>
+                <% 
+                  total_rooms = @hotel.rooms.count
+                  occupied_rooms = @hotel.rooms.where(available: false).count
+                  occupation_rate = total_rooms > 0 ? (occupied_rooms.to_f / total_rooms * 100).round : 0
+                %>
+                <div class="text-xl font-semibold text-purple-600"><%= occupation_rate %>%</div>
+                <div class="text-xs text-purple-600 mt-1">
+                  <%= occupied_rooms %> chambres occupées
+                </div>
+              </div>
+
+              <div class="bg-yellow-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm text-gray-600">Revenu/jr</div>
+                  <i class="fas fa-coins text-yellow-400"></i>
+                </div>
+                <div class="text-xl font-semibold text-yellow-600">
+                  <%= number_to_currency(@hotel.rooms.sum(:price), unit: "€", format: "%n %u") %>
+                </div>
+                <div class="text-xs text-yellow-600 mt-1">
+                  Prix moyen: <%= number_to_currency(@hotel.rooms.average(:price).to_f, unit: "€", format: "%n %u") %>/chambre
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <% if @hotel.rooms.empty? %>
+      <div class="mb-6">
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-yellow-700">
+                <strong class="font-medium">Attention :</strong>
+                Cet hôtel n'a aucune chambre configurée. Il ne sera pas visible sur le site public tant que vous n'aurez pas ajouté au moins une chambre.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Section des chambres -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+            <i class="fas fa-bed text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Chambres</h2>
+            <p class="text-sm text-gray-500">
+              <%= pluralize(@hotel.rooms.count, 'chambre') %> au total
+            </p>
+          </div>
+        </div>
+      <%= link_to new_provider_hotel_room_path(@hotel), 
+          class: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center" do %>
+        <i class="fas fa-plus mr-2"></i>
+        Ajouter une chambre
+      <% end %>
+    </div>    <div class="p-6">
+      <% if @hotel.rooms.any? %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% @hotel.rooms.each do |room| %>
+            <div class="bg-gray-50 rounded-lg p-4 relative" data-controller="room">
+              <div class="absolute top-4 right-4">
+                <div class="flex space-x-2">
+                  <%= link_to edit_provider_hotel_room_path(@hotel, room), class: "text-gray-400 hover:text-blue-600" do %>
+                    <i class="fas fa-edit"></i>
+                  <% end %>
+                  <%= button_to provider_hotel_room_path(@hotel, room), method: :delete, class: "text-gray-400 hover:text-red-600", data: { turbo_confirm: "Êtes-vous sûr de vouloir supprimer cette chambre ?" } do %>
+                    <i class="fas fa-trash"></i>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex items-start space-x-4">
+                  <div class="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
+                      <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fas fa-image text-3xl"></i>
+                      </div>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900"><%= room.type_room %></h3>
+                    <p class="text-sm text-gray-500"><%= pluralize(room.beds, "lit") %></p>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <% if room.services.present? %>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                      <i class="fas fa-concierge-bell"></i>
+                      <span><%= room.services %></span>
+                    </div>
+                  <% end %>
+                  
+                  <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <i class="fas fa-euro-sign"></i>
+                    <span><%= number_to_currency(room.price, unit: "€", format: "%n %u") %> / nuit</span>
+                  </div>
+
+                  <!-- Statistiques des réservations -->
+                  <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <i class="fas fa-calendar-check"></i>
+                    <span><%= pluralize(room.reservations.count, 'réservation') %></span>
+                  </div>
+                </div>
+
+                <!-- État de la chambre -->
+                <div class="pt-2 border-t border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= room.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                      <%= room.available ? "Disponible" : "Indisponible" %>
+                    </span>
+                    <button type="button" 
+                            class="text-sm text-blue-600 hover:text-blue-800"
+                            data-action="click->room#toggleReservations"
+                            data-room-target="toggleButton"
+                            data-room-id="<%= room.id %>">
+                      Voir les réservations
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Liste des réservations (masquée par défaut) -->
+                <div class="hidden pt-3 space-y-2" data-room-target="reservationsList" id="reservations-<%= room.id %>">
+                  <% if room.reservations.any? %>
+                    <% room.reservations.order(start_date: :desc).each do |reservation| %>
+                      <div class="bg-white rounded-lg border border-gray-200 p-3 text-sm">
+                        <div class="flex items-center justify-between mb-2">
+                          <div class="flex items-center space-x-2">
+                            <i class="fas fa-user text-gray-400"></i>
+                            <span class="text-gray-900"><%= reservation.user.email %></span>
+                          </div>
+                          <% status_class = case reservation.status
+                              when "pending"
+                                "bg-yellow-100 text-yellow-800"
+                              when "confirmed"
+                                "bg-green-100 text-green-800"
+                              when "rejected"
+                                "bg-red-100 text-red-800"
+                              else
+                                "bg-gray-100 text-gray-800"
+                              end %>
+                          <span class="px-2 py-1 text-xs font-medium rounded-full <%= status_class %>">
+                            <%= reservation.status.capitalize %>
+                          </span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-500">
+                          <i class="fas fa-calendar text-gray-400"></i>
+                          <span>Du <%= l(reservation.start_date, format: :long) %></span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-500">
+                          <i class="fas fa-calendar-check text-gray-400"></i>
+                          <span>Au <%= l(reservation.end_date, format: :long) %></span>
+                        </div>
+                      </div>
+                    <% end %>
+                  <% else %>
+                    <p class="text-sm text-gray-500 italic">Aucune réservation pour cette chambre</p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <!-- État vide -->
+        <div class="text-center py-12">
+          <div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-bed text-gray-300 text-3xl"></i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune chambre pour le moment</h3>
+          <p class="text-gray-500 mb-6">Commencez par ajouter des chambres à votre hôtel</p>
+          <%= link_to new_provider_hotel_room_path(@hotel), 
+              class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" do %>
+            <i class="fas fa-plus mr-2"></i>
+            Ajouter une chambre
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
+
+

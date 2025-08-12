@@ -1,0 +1,319 @@
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- En-tête de la page -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                    <i class="fas fa-plane text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Mes Voyages</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <%= pluralize(@trips.count, 'voyage' , 'voyages' ) %> au total
+                    </p>
+                </div>
+            </div>
+            <%= link_to new_provider_trip_path,
+                class: "inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" do %>
+                <i class="fas fa-plus mr-2"></i>
+                Nouveau voyage
+                <% end %>
+        </div>
+
+        <% if @trips.any? %>
+            <!-- Barre de recherche et filtres -->
+            <div class="px-6 pb-6 border-t border-gray-100 pt-4">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <!-- Recherche -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="tripSearch"
+                                class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                                placeholder="Rechercher par titre, thème ou destination..." </div>
+                        </div>
+                        <!-- Filtres -->
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                            <select id="themeFilter"
+                                class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                                <option value="">Tous les thèmes</option>
+                                <% @trips.pluck(:theme).uniq.compact.sort.each do |theme| %>
+                                    <option value="<%= theme %>">
+                                        <%= theme %>
+                                    </option>
+                                    <% end %>
+                            </select>
+                            <select id="destinationFilter"
+                                class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                                <option value="">Toutes les destinations</option>
+                                <% @trips.pluck(:destinationCity).uniq.compact.sort.each do |destination| %>
+                                    <option value="<%= destination %>">
+                                        <%= destination %>
+                                    </option>
+                                    <% end %>
+                            </select>
+                            <select id="durationFilter"
+                                class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                                <option value="">Toutes les durées</option>
+                                <option value="1-3">1-3 jours</option>
+                                <option value="4-7">4-7 jours</option>
+                                <option value="8-14">8-14 jours</option>
+                                <option value="15+">15+ jours</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <% end %>
+            </div>
+
+            <% if @trips.any? %>
+                <!-- Tableau des voyages -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Voyage
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Destination
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Dates & Durée
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Prix
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="tripTableBody">
+                                <% @trips.each do |trip| %>
+                                    <tr class="hover:bg-gray-50 transition-colors duration-150 trip-row"
+                                        data-title="<%= trip.title.downcase %>" data-theme="<%= trip.theme&.downcase %>"
+                                        data-destination="<%= trip.destinationCity&.downcase %>"
+                                        data-duration="<%= trip.duration %>">
+                                        <!-- Informations du voyage -->
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-12 w-12">
+                                                    <div
+                                                        class="h-12 w-12 rounded-lg bg-green-50 flex items-center justify-center">
+                                                        <i class="fas fa-map-marked-alt text-green-500"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <%= trip.title %>
+                                                    </div>
+                                                    <% if trip.theme.present? %>
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                                                            <%= trip.theme %>
+                                                        </span>
+                                                        <% end %>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Destination -->
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-start gap-2">
+                                                <div>
+                                                    <div class="flex items-center gap-2 text-sm">
+                                                        <i class="fas fa-plane-departure text-gray-400 text-xs"></i>
+                                                        <span class="text-gray-600">
+                                                            <%= trip.departureCity %>
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2 text-sm mt-1">
+                                                        <i class="fas fa-map-marker-alt text-green-500 text-xs"></i>
+                                                        <span class="font-medium text-gray-900">
+                                                            <%= trip.destinationCity %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Dates & Durée -->
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-start gap-2">
+                                                <i class="fas fa-calendar-alt text-gray-400 mt-0.5"></i>
+                                                <div>
+                                                    <div class="text-sm text-gray-900">
+                                                        <%= trip.departureDate.strftime("%d/%m/%Y") if
+                                                            trip.departureDate %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        au <%= trip.returnDate.strftime("%d/%m/%Y") if trip.returnDate
+                                                            %>
+                                                    </div>
+                                                    <div class="flex items-center gap-1 mt-1">
+                                                        <i class="fas fa-clock text-gray-400 text-xs"></i>
+                                                        <span class="text-xs text-gray-500">
+                                                            <%= trip.duration %> jour<%= 's' if trip.duration> 1 %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Prix -->
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-euro-sign text-gray-400"></i>
+                                                <div>
+                                                    <% if trip.price.present? %>
+                                                        <div class="text-sm font-medium text-gray-900">
+                                                            <%= number_to_currency(trip.price, unit: '€' ,
+                                                                separator: ',' , delimiter: ' ' ) %>
+                                                        </div>
+                                                        <div class="text-xs text-gray-500">par personne</div>
+                                                        <% else %>
+                                                            <div class="text-sm text-gray-500 italic">Prix non défini
+                                                            </div>
+                                                            <% end %>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <%= link_to provider_trip_path(trip),
+                                                    class: "p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors", title: "Voir les détails" do %>
+                                                    <i class="fas fa-eye"></i>
+                                                    <% end %>
+                                                        <%= link_to edit_provider_trip_path(trip),
+                                                            class: "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors", title: "Modifier" do %>
+                                                            <i class="fas fa-edit"></i>
+                                                            <% end %>
+                                                                <%= link_to provider_trip_path(trip), data: {
+                                                                    turbo_method: :delete,
+                                                                    turbo_confirm: "Êtes-vous sûr de vouloir supprimer ce voyage ? Cette action est irréversible."
+                                                                    },
+                                                                    class: "p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" , title: "Supprimer" do %>
+                                                                    <i class="fas fa-trash"></i>
+                                                                    <% end %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <% else %>
+                    <!-- État vide -->
+                    <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+                        <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-plane text-green-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Créez votre première aventure</h3>
+                        <p class="text-gray-500 mb-6 max-w-md mx-auto">
+                            Ajoutez votre premier voyage pour commencer à proposer des expériences inoubliables à vos
+                            clients.
+                        </p>
+                        <%= link_to new_provider_trip_path,
+                            class: "inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" do %>
+                            <i class="fas fa-plus mr-2"></i>
+                            Ajouter mon premier voyage
+                            <% end %>
+                    </div>
+                    <% end %>
+    </div>
+
+    <%= content_for :scripts do %>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const searchInput = document.getElementById('tripSearch');
+                const themeFilter = document.getElementById('themeFilter');
+                const destinationFilter = document.getElementById('destinationFilter');
+                const durationFilter = document.getElementById('durationFilter');
+                const tripRows = document.querySelectorAll('.trip-row');
+
+                function filterTrips() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedTheme = themeFilter.value.toLowerCase();
+                    const selectedDestination = destinationFilter.value.toLowerCase();
+                    const selectedDuration = durationFilter.value;
+
+                    tripRows.forEach(row => {
+                        const title = row.dataset.title;
+                        const theme = row.dataset.theme || '';
+                        const destination = row.dataset.destination || '';
+                        const duration = parseInt(row.dataset.duration);
+
+                        const matchesSearch = title.includes(searchTerm) ||
+                            theme.includes(searchTerm) ||
+                            destination.includes(searchTerm) ||
+                            row.textContent.toLowerCase().includes(searchTerm);
+
+                        const matchesTheme = !selectedTheme || theme === selectedTheme;
+                        const matchesDestination = !selectedDestination || destination === selectedDestination;
+
+                        let matchesDuration = true;
+                        if (selectedDuration) {
+                            switch (selectedDuration) {
+                                case '1-3':
+                                    matchesDuration = duration >= 1 && duration <= 3;
+                                    break;
+                                case '4-7':
+                                    matchesDuration = duration >= 4 && duration <= 7;
+                                    break;
+                                case '8-14':
+                                    matchesDuration = duration >= 8 && duration <= 14;
+                                    break;
+                                case '15+':
+                                    matchesDuration = duration >= 15;
+                                    break;
+                            }
+                        }
+
+                        row.style.display = matchesSearch && matchesTheme && matchesDestination && matchesDuration ? '' : 'none';
+                    });
+
+                    // Mettre à jour le style des lignes visibles (pour les bordures)
+                    updateVisibleRows();
+                }
+
+                function updateVisibleRows() {
+                    const visibleRows = Array.from(tripRows).filter(row => row.style.display !== 'none');
+                    visibleRows.forEach((row, index) => {
+                        if (index === visibleRows.length - 1) {
+                            row.classList.add('border-b-0');
+                        } else {
+                            row.classList.remove('border-b-0');
+                        }
+                    });
+                }
+
+                // Événements
+                searchInput.addEventListener('input', filterTrips);
+                themeFilter.addEventListener('change', filterTrips);
+                destinationFilter.addEventListener('change', filterTrips);
+                durationFilter.addEventListener('change', filterTrips);
+
+                // Animation du focus sur la recherche
+                searchInput.addEventListener('focus', function () {
+                    this.parentElement.classList.add('ring-2', 'ring-green-500');
+                });
+
+                searchInput.addEventListener('blur', function () {
+                    this.parentElement.classList.remove('ring-2', 'ring-green-500');
+                });
+            });
+        </script>
+        <% end %>

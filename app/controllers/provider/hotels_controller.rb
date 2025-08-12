@@ -1,8 +1,11 @@
     class Provider::HotelsController < ApplicationController
+        layout "dashboard"
         before_action :authenticate_user!
+        before_action :set_provider
         before_action :check_hotelier
         before_action :set_hotel, only: [:show, :edit, :update, :destroy]
         def index
+            @hotels = current_user.provider.hotels.order(created_at: :desc)
         end
 
         def new 
@@ -51,8 +54,12 @@ end
             redirect_to root_path, alert: "Accès réservé aux hotelier" and return
             end
         end
+        def set_provider
+            @provider = current_user.provider
+        end
 
         def set_hotel
+            @provider=current_user.provider
             @hotel = current_user.provider.hotels.find(params[:id])
           end
         
