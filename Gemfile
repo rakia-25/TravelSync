@@ -10,7 +10,9 @@ gem "sprockets-rails"
 gem 'devise', '~> 4.9', '>= 4.9.3'
 
 # Use sqlite3 as the database for Active Record
-gem "sqlite3", "~> 1.6"
+#gem "sqlite3", "~> 1.4"
+gem 'sqlite3', '~> 1.4.4'
+
 
 gem 'image_processing', '~> 1.2'
 
@@ -46,7 +48,7 @@ gem "tzinfo-data", platforms: %i[ mswin mswin64 mingw x64_mingw jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-gem "tailwindcss-ruby", "~> 4.1"
+#gem "tailwindcss-ruby", "~> 4.1"
 
 gem "tailwindcss-rails", "~> 4.3"
 
