@@ -1,46 +1,667 @@
-<div class="container-xxl py-5">
-  <div class="container">
-    <h1 class="text-center text-primary fw-bold mb-4 fs-3">
-      Espace Agence de Voyage
-    </h1>
-    <div class="mb-4 text-center text-muted fs-6">
-      <p><strong>Prestataire :</strong> <%= @provider.type_provider.humanize %></p>
-      <p><strong>Entreprise :</strong> <%= @provider.business %></p>
-      <p><strong>Adresse :</strong> <%= @provider.address %></p>
-      <p><strong>Téléphone :</strong> <%= current_user.phone %></p>
+<div class="max-w-7xl mx-auto p-8">
+  <!-- En-tête du tableau de bord -->
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
+    <div class="flex-1">
+      <div class="flex items-center mb-2 space-x-3">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mr-4">
+            <i class="fas fa-plane text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              Tableau de bord Agence de Voyage
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">
+              <%= Time.current.strftime("%A %d %B %Y") %>
+            </p>
+          </div>
+        </div>
+        <span
+          class="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-50 rounded-full border border-purple-100">
+          <%= pluralize(@total_trips, 'voyage' , 'voyages' ) %>
+        </span>
+      </div>
+      <p class="text-gray-600 flex items-center">
+        <i class="fas fa-compass text-purple-500 mr-2"></i>
+        Gérez vos voyages et suivez vos performances en temps réel
+      </p>
     </div>
-    <div class="text-center mb-4">
-      <%= link_to "Ajouter un circuit", new_provider_trip_path, class: "btn btn-primary" %>
-    </div>
-    <% if @trips.any? %>
-      <div class="d-flex flex-wrap justify-content-center gap-4">
-        <% @trips.each do |trip| %>
-          <div class="card shadow-sm" style="width: 20rem;">
-            <% if trip.images.attached? %>
-              <%= image_tag trip.images.first.variant(resize_to_limit: [320, 180]), 
-                class: "card-img-top", 
-                alt: "Image du circuit #{trip.title}" %>
-            <% else %>
-              <img src="https://via.placeholder.com/320x180?text=Pas+d%27image" 
-       class="card-img-top" 
-       alt="Pas d'image disponible" />
+
+    <!-- Filtres par période -->
+    <div class="flex items-center space-x-2 bg-gray-50 p-1 rounded-xl">
+      <%= link_to dashboard_provider_path(period: 'week' ),
+        class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'week' || params[:period].nil? ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+        <i class="fas fa-calendar-week mr-2"></i>
+        Semaine
+        <% end %>
+
+          <%= link_to dashboard_provider_path(period: 'month' ),
+            class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'month' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+            <i class="fas fa-calendar-alt mr-2"></i>
+            Mois
             <% end %>
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title"><%= trip.title %></h5>
-              <h6 class="card-subtitle mb-2 text-muted"><%= trip.theme %></h6>
-              <p class="card-text"><strong>Durée :</strong> <%= trip.duration %> jours</p>
-              <p class="card-text"><strong>Départ :</strong> <%= trip.departureDate&.strftime("%d/%m/%Y") || "-" %></p>
-              <div class="mt-4 d-flex gap-2 justify-content-center">
-                <%= link_to "Voir", provider_trip_path(trip), class: "btn btn-sm btn-info" %>
-                <%= link_to "Modifier", edit_provider_trip_path(trip), class: "btn btn-sm btn-warning" %>
-                <%= button_to "Supprimer", provider_trip_path(trip), method: :delete, data: { confirm: "Supprimer ce circuit ?" }, class: "btn btn-sm btn-danger" %>
+
+              <%= link_to dashboard_provider_path(period: 'year' ),
+                class: "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 #{params[:period] == 'year' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}" do %>
+                <i class="fas fa-calendar mr-2"></i>
+                Année
+                <% end %>
+    </div>
+  </div>
+
+  <!-- Cartes de métriques principales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Revenus -->
+    <div
+      class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-emerald-100">
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110">
+      </div>
+
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-euro-sign text-xl"></i>
+          </div>
+          <% total_revenue=@reservations.where(status: "confirmed" ).sum(&:total_price) || 0 %>
+            <% if total_revenue> 0 %>
+              <div class="flex items-center space-x-1">
+                <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                <span
+                  class="text-xs font-medium text-green-500 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                  +15.2%
+                </span>
               </div>
+              <% end %>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Revenus Totaux</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= number_to_currency(total_revenue, unit: "€" , precision: 0) %>
+          </h3>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-chart-bar mr-2 text-emerald-500"></i>
+            <span>Ce mois</span>
+          </div>
+          <% monthly_revenue=@reservations.where(status: "confirmed" ).where("created_at>= ?",
+            1.month.ago).sum(&:total_price) || 0 %>
+            <span class="font-medium text-gray-900">
+              <%= number_to_currency(monthly_revenue, unit: "€" , precision: 0) %>
+            </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Réservations -->
+    <div
+      class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-blue-100">
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110">
+      </div>
+
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-ticket-alt text-xl"></i>
+          </div>
+          <div class="flex space-x-2">
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-green-500"></span>
+              <span class="text-xs font-medium text-gray-600">
+                <%= @confirmed_reservations %>
+              </span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+              <span class="text-xs font-medium text-gray-600">
+                <%= @pending_reservations %>
+              </span>
             </div>
           </div>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Total Réservations</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= @total_reservations %>
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+            <span>
+              <%= @confirmed_reservations %> conf.
+            </span>
+          </div>
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-clock text-yellow-500 mr-2"></i>
+            <span>
+              <%= @pending_reservations %> atten.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voyages -->
+    <div
+      class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-purple-100">
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110">
+      </div>
+
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-map-marked-alt text-xl"></i>
+          </div>
+          <span
+            class="text-xs font-medium bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full border border-purple-100">
+            Actif
+          </span>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Voyages</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <%= @total_trips %> voyages
+          </h3>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <div class="flex items-center text-gray-500">
+            <i class="fas fa-globe mr-2 text-purple-500"></i>
+            <span>Destinations</span>
+          </div>
+          <span class="font-medium text-gray-900">
+            <%= @trips.distinct.count(:destinationCity) %> villes
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taux de réservation -->
+    <div
+      class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-pink-100">
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-full -mr-16 -mt-16 transform transition-transform duration-300 group-hover:scale-110">
+      </div>
+
+      <div class="relative p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-percentage text-xl"></i>
+          </div>
+          <div class="flex items-center space-x-1">
+            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+            <span
+              class="text-xs font-medium text-green-500 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+              +8.3%
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-1">Taux de réservation</p>
+          <% booking_rate=@total_trips> 0 ? ((@total_reservations.to_f / @total_trips) * 10).round(1) : 0 %>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">
+              <%= booking_rate %>%
+            </h3>
+        </div>
+
+        <div class="relative">
+          <div class="overflow-hidden h-2 rounded-full bg-pink-100/50">
+            <div class="h-full rounded-full bg-pink-500 transition-all duration-500"
+              style="width: <%= [booking_rate, 100].min %>%"></div>
+          </div>
+          <div class="flex items-center justify-between mt-2 text-xs font-medium">
+            <span class="text-gray-500">Performance</span>
+            <span class="text-pink-600">
+              <%= booking_rate %>%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dernières réservations -->
+  <div class="mb-8">
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div class="p-5 border-b border-gray-50 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <i class="fas fa-ticket-alt text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">Dernières Réservations</h2>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+      </div>
+      <div class="p-5">
+        <div class="space-y-3">
+          <% if @reservations.any? %>
+            <% @reservations.includes(:user, :reservable).order(created_at: :desc).limit(5).each do |reservation| %>
+              <% trip=reservation.reservable %>
+                <div
+                  class="group flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 border border-gray-100">
+                  <!-- Indicateur de statut -->
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center <%= case reservation.status
+                    when 'confirmed' then 'bg-green-50 text-green-600'
+                    when 'pending' then 'bg-yellow-50 text-yellow-600'
+                    when 'cancelled' then 'bg-red-50 text-red-600'
+                    when 'rejected' then 'bg-red-50 text-red-600'
+                    when 'paid' then 'bg-blue-50 text-blue-600'
+                    else 'bg-gray-50 text-gray-600'
+                    end %> group-hover:scale-105 transition-transform duration-200">
+                      <i class="fas <%= case reservation.status
+                      when 'confirmed' then 'fa-check'
+                      when 'pending' then 'fa-clock'
+                      when 'cancelled' then 'fa-times'
+                      when 'rejected' then 'fa-ban'
+                      when 'paid' then 'fa-money-bill-wave'
+                      else 'fa-question'
+                      end %> text-lg"></i>
+                    </div>
+                  </div>
+
+                  <!-- Informations de la réservation -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <p class="text-sm font-medium text-gray-900 truncate">
+                        <%= reservation.user.first_name %>
+                          <%= reservation.user.last_name %>
+                      </p>
+                      <span class="text-xs text-gray-500">
+                        <%= time_ago_in_words(reservation.created_at) %>
+                      </span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 text-sm text-gray-500">
+                      <span class="flex items-center space-x-1">
+                        <i class="fas fa-map-marker-alt text-gray-400"></i>
+                        <span class="truncate">
+                          <%= trip.title %>
+                        </span>
+                      </span>
+                      <span class="text-gray-300">•</span>
+                      <span class="flex items-center space-x-1">
+                        <i class="fas fa-tag text-gray-400"></i>
+                        <span>
+                          <%= trip.theme %>
+                        </span>
+                      </span>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-2">
+                      <div class="flex items-center text-xs space-x-2">
+                        <span class="flex items-center space-x-1 text-gray-500">
+                          <i class="fas fa-route text-gray-400"></i>
+                          <span>
+                            <%= trip.departureCity %> → <%= trip.destinationCity %>
+                          </span>
+                        </span>
+                      </div>
+                      <span class="text-sm font-medium text-gray-900">
+                        <%= number_to_currency(reservation.total_price, unit: "€" ) %>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Action -->
+                  <div class="flex-shrink-0">
+                    <%= link_to "#" , class: "p-2 text-gray-400 hover:text-purple-600 transition-colors duration-200" do
+                      %>
+                      <i class="fas fa-chevron-right"></i>
+                      <% end %>
+                  </div>
+                </div>
+                <% end %>
+
+                  <!-- Voir plus -->
+                  <%= link_to provider_reservations_path,
+                    class: "mt-4 flex items-center justify-center py-3 px-4 text-sm text-gray-600 hover:text-purple-600 transition-colors duration-200 group rounded-lg hover:bg-gray-50" do %>
+                    <span>Voir toutes les réservations</span>
+                    <i
+                      class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform duration-200"></i>
+                    <% end %>
+                      <% else %>
+                        <!-- État vide -->
+                        <div class="text-center py-8">
+                          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-ticket-alt text-gray-400 text-xl"></i>
+                          </div>
+                          <h3 class="text-gray-500 text-sm">Aucune réservation pour le moment</h3>
+                        </div>
+                        <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="space-y-8">
+    <!-- Liste des voyages -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border-b border-gray-200 gap-4">
+        <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-map-marked-alt text-gray-400 mr-2"></i>
+          Mes Voyages
+        </h2>
+        <div class="flex gap-2">
+          <%= link_to new_provider_trip_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-200" do %>
+            <i class="fas fa-plus"></i>
+            Ajouter un voyage
+            <% end %>
+              <%= link_to dashboard_provider_export_path(format: :csv),
+                class: "inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200" do %>
+                <i class="fas fa-download"></i>
+                Exporter CSV
+                <% end %>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <% if @trips.any? %>
+          <div class="space-y-6">
+            <!-- En-tête de la section -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Top Voyages</h3>
+              <p class="text-sm text-gray-500">Les destinations les plus populaires de votre catalogue</p>
+            </div>
+
+            <!-- Liste des top voyages -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <% @reserv_by_trip.take(3).each_with_index do |trip_data, index| %>
+                <% trip=@trips.find { |t| t.title==trip_data[:title] } %>
+                  <div
+                    class="group relative bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <!-- Badge de classement -->
+                    <div class="absolute top-4 left-4 z-20">
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="px-3 py-1 text-xs font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-md">
+                          #<%= index + 1 %> Top Voyage
+                        </span>
+                        <span class="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full shadow-sm">
+                          Actif
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Image de couverture -->
+                    <div class="relative h-56 overflow-hidden bg-gradient-to-br from-purple-100 via-pink-50 to-orange-100">
+                      <% if trip&.images&.attached? %>
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10">
+                      </div>
+                      <%= image_tag trip.images.first, alt: "#{trip.title} #{trip.theme}" ,
+                        class: "w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 filter group-hover:brightness-110"
+                        %>
+                        <% else %>
+                      <div class="w-full h-full bg-gradient-to-br from-purple-200 via-pink-200 to-orange-200 flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+                        <div class="p-6 rounded-full bg-white/30 backdrop-blur-sm">
+                          <i class="fas fa-plane text-4xl text-purple-600/80"></i>
+                        </div>
+                      </div>
+                      <% end %>
+
+                      <!-- Statistiques sur l'image -->
+                      <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center z-20">
+                        <div class="px-3 py-2 rounded-lg bg-white/90 backdrop-blur-sm shadow-sm">
+                          <div class="flex items-center gap-3">
+                            <div class="flex items-center">
+                              <i class="fas fa-calendar-alt text-purple-500 mr-1.5"></i>
+                              <span class="text-sm font-medium text-gray-900">
+                                <%= trip.duration %> jours
+                              </span>
+                            </div>
+                            <div class="w-px h-4 bg-gray-200"></div>
+                            <div class="flex items-center">
+                              <i class="fas fa-users text-orange-400 mr-1.5"></i>
+                              <span class="text-sm font-medium text-gray-900">
+                                <%= trip_data[:count] %>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="p-6">
+                      <!-- En-tête -->
+                      <div class="mb-4">
+                        <div class="flex items-start justify-between">
+                          <div>
+                            <h3
+                              class="text-xl font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors duration-200">
+                              <%= trip.title %>
+                            </h3>
+                            <p class="text-sm text-gray-600 flex items-center">
+                              <i class="fas fa-route text-purple-500 mr-2"></i>
+                              <%= trip.departureCity %> → <%= trip.destinationCity %>
+                            </p>
+                          </div>
+                          <div class="flex items-center">
+                            <span
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
+                              <%= trip.theme %>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Statistiques -->
+                      <div class="grid grid-cols-2 gap-4 py-4 border-t border-gray-50">
+                        <!-- Réservations -->
+                        <div
+                          class="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 group/stat relative overflow-hidden">
+                          <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full -mr-8 -mt-8">
+                          </div>
+                          <div class="relative">
+                            <div class="flex items-center justify-between mb-1">
+                              <p class="text-sm font-medium text-gray-600">Réserv.</p>
+                              <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                                Total
+                              </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <p class="text-2xl font-bold text-blue-600">
+                                <%= trip_data[:count] %>
+                              </p>
+                              <div class="text-blue-400">
+                                <i class="fas fa-ticket-alt text-xl"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Revenus -->
+                        <div
+                          class="p-3 rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 group/stat relative overflow-hidden">
+                          <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-400/10 to-transparent rounded-full -mr-8 -mt-8">
+                          </div>
+                          <div class="relative">
+                            <div class="flex items-center justify-between mb-1">
+                              <p class="text-sm font-medium text-gray-600">Revenus</p>
+                              <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                                €
+                              </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <p class="text-lg font-bold text-green-600">
+                                <%= number_to_currency(trip_data[:revenue], unit: "" , precision: 0) %>€
+                              </p>
+                              <div class="text-green-400">
+                                <i class="fas fa-euro-sign text-lg"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Actions -->
+                      <div class="pt-4 border-t border-gray-100 flex justify-end gap-2">
+                        <%= link_to provider_trip_path(trip),
+                          class: "inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 hover:text-purple-600 border border-gray-200 transition-all duration-200 group" do %>
+                          <i class="fas fa-eye text-sm mr-1.5 group-hover:text-purple-500"></i>
+                          Détails
+                          <% end %>
+                            <%= link_to edit_provider_trip_path(trip),
+                              class: "inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-lg shadow-sm hover:shadow transition-all duration-200 group" do %>
+                              <i class="fas fa-edit text-sm mr-1.5 group-hover:animate-pulse"></i>
+                              Modifier
+                              <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  <% end %>
+            </div>
+
+            <!-- Voir tous les voyages -->
+            <% if @total_trips> 6 %>
+              <div class="text-center">
+                <%= link_to provider_trips_path,
+                  class: "inline-flex items-center px-6 py-3 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors duration-200 group" do %>
+                  <span>Voir tous les voyages (<%= @total_trips %>)</span>
+                  <i
+                    class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform duration-200"></i>
+                  <% end %>
+              </div>
+              <% end %>
+          </div>
+          <% else %>
+            <div class="text-center py-12 text-gray-500">
+              <i class="fas fa-plane text-5xl mb-4 opacity-50"></i>
+              <h3 class="text-lg font-medium text-gray-700 mb-2">Aucun voyage enregistré</h3>
+              <p class="mb-4">Commencez par ajouter votre premier voyage</p>
+              <%= link_to new_provider_trip_path,
+                class: "inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-200" do %>
+                <i class="fas fa-plus"></i>
+                Ajouter un voyage
+                <% end %>
+            </div>
+            <% end %>
+      </div>
+    </div>
+
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-clock text-gray-400 mr-2"></i>
+        Activités Récentes
+      </h2>
+      <p class="text-sm text-gray-500 mt-1">Suivi en temps réel de vos dernières actions</p>
+    </div>
+  
+    <div class="p-6">
+      <div class="space-y-4">
+        <div class="relative">
+          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-200 via-blue-200 to-green-200">
+          </div>
+  
+          <% @recent_activities.each do |activity| %>
+            <div class="relative flex items-start space-x-4 pb-6">
+              <div class="flex-shrink-0">
+                <% case activity[:type] %>
+                  <% when :reservation_new %>
+                    <div
+                      class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center border-2 border-white shadow-sm">
+                      <i class="fas fa-plus text-green-600 text-sm"></i>
+                    </div>
+                    <% when :trip_new %>
+                      <div
+                        class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center border-2 border-white shadow-sm">
+                        <i class="fas fa-plane text-purple-600 text-sm"></i>
+                      </div>
+                      <% else %>
+                        <div
+                          class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm">
+                          <i class="fas fa-info text-gray-600 text-sm"></i>
+                        </div>
+                        <% end %>
+              </div>
+  
+              <div class="flex-1 min-w-0 rounded-lg p-4 border
+                <%= case activity[:type]
+                    when :reservation_new then " bg-green-50/50 border-green-100" when :trip_new
+                then "bg-purple-50/50 border-purple-100" else "bg-gray-50/50 border-gray-100" end %>">
+                <% case activity[:type] %>
+                  <% when :reservation_new %>
+                    <div class="flex items-center justify-between mb-2">
+                      <h4 class="text-sm font-medium text-gray-900">Nouvelle réservation confirmée</h4>
+                      <span class="text-xs text-gray-500">
+                        <%= time_ago_in_words(activity[:time]) %> ago
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                      <strong>
+                        <%= activity[:user_name] %>
+                      </strong> a réservé le voyage "<%= activity[:message].split(" : ").last || activity[:message] %>"
+                        </p>
+                        <div class="flex items-center space-x-4 text-xs">
+                          <span class="flex items-center text-green-600">
+                            <i class="fas fa-euro-sign mr-1"></i>
+                            +<%= number_to_currency(activity[:price], unit: "€" , format: "%n%u" ) %>
+                          </span>
+                          <span class="flex items-center text-gray-500">
+                            <i class="fas fa-calendar mr-1"></i>
+                            Départ: <%= activity[:departure_date]&.strftime("%d %B %Y") || "Non disponible" %>
+                          </span>
+
+                        </div>
+                        <% when :trip_new %>
+                          <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-sm font-medium text-gray-900">Nouveau voyage créé</h4>
+                            <span class="text-xs text-gray-500">
+                              <%= time_ago_in_words(activity[:time]) %> ago
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3">
+                            <strong>
+                              <%= activity[:message].split(" : ").last || activity[:message] %></strong> a été ajouté à votre catalogue de voyages
+                  </p>
+                  <div class=" flex items-center space-x-4 text-xs">
+                                <span class="flex items-center text-purple-600">
+                                  <i class="fas fa-calendar-alt mr-1"></i>
+                                  <%= activity[:duration] %> jours
+                                </span>
+                                <span class="flex items-center text-gray-500">
+                                  <i class="fas fa-users mr-1"></i>
+                                  Max <%= activity[:max_people] || "N/A" %> personnes
+                                </span>
+              </div>
+              <% else %>
+                <p>
+                  <%= activity[:message] %>
+                </p>
+                <% end %>
+            </div>
+        </div>
         <% end %>
       </div>
-    <% else %>
-      <p class="text-muted fst-italic text-center">Vous n'avez encore enregistré aucun circuit.</p>
-    <% end %>
+    </div>
+  
+    <div class="mt-8 text-center">
+      <button
+        class="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-purple-600 transition-colors duration-200 group border border-gray-200 rounded-lg hover:border-purple-200 hover:bg-purple-50">
+        <span>Voir tout l'historique</span>
+        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform duration-200"></i>
+      </button>
+    </div>
   </div>
-</div>
+  </div>

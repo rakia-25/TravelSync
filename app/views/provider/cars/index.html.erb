@@ -1,0 +1,312 @@
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- En-tête de la page -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                    <i class="fas fa-car text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Mes Véhicules</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <%= pluralize(@cars.count, 'véhicule' , 'véhicules' ) %> au total
+                    </p>
+                </div>
+            </div>
+            <%= link_to new_provider_car_path,
+                class: "inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" do %>
+                <i class="fas fa-plus mr-2"></i>
+                Nouveau véhicule
+                <% end %>
+        </div>
+
+        <% if @cars.any? %>
+            <!-- Barre de recherche et filtres -->
+            <div class="px-6 pb-6 border-t border-gray-100 pt-4">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <!-- Recherche -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="carSearch"
+                                class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                                placeholder="Rechercher par nom, marque, modèle ou options..." />
+                        </div>
+                    </div>
+                    <!-- Filtres -->
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                        <select id="brandFilter"
+                            class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                            <option value="">Toutes les marques</option>
+                            <% @cars.pluck(:brand).uniq.compact.sort.each do |brand| %>
+                                <option value="<%= brand %>">
+                                    <%= brand %>
+                                </option>
+                                <% end %>
+                        </select>
+                        <select id="availabilityFilter"
+                            class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                            <option value="">Toutes disponibilités</option>
+                            <option value="true">Disponible</option>
+                            <option value="false">Non disponible</option>
+                        </select>
+                        <select id="priceFilter"
+                            class="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm bg-white">
+                            <option value="">Tous les prix</option>
+                            <option value="0-50">0 - 50€</option>
+                            <option value="50-100">50 - 100€</option>
+                            <option value="100-200">100 - 200€</option>
+                            <option value="200+">200€ et plus</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <% end %>
+    </div>
+
+    <% if @cars.any? %>
+        <!-- Tableau des voitures -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Véhicule
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Prix / jour
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Options
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Disponibilité
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="carTableBody">
+                        <% @cars.each do |car| %>
+                            <tr class="hover:bg-gray-50 transition-colors duration-150 car-row"
+                                data-name="<%= car.name&.downcase %>" data-brand="<%= car.brand&.downcase %>"
+                                data-model="<%= car.model&.downcase %>" data-available="<%= car.available %>"
+                                data-price="<%= car.price %>">
+                                <!-- Informations du véhicule -->
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-12 w-12">
+                                            <% if car.images&.attached? %>
+                                                <%= image_tag car.images.first,
+                                                    class: "h-12 w-12 rounded-lg object-cover shadow-sm" %>
+                                                    <% else %>
+                                                        <div
+                                                            class="h-12 w-12 rounded-lg bg-green-50 flex items-center justify-center">
+                                                            <i class="fas fa-car text-green-400"></i>
+                                                        </div>
+                                                        <% end %>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <%= car.name.presence || "#{car.brand} #{car.model}" %>
+                                            </div>
+                                            <div class="text-sm text-gray-500 mt-0.5">
+                                                <span class="inline-flex items-center gap-1">
+                                                    <i class="fas fa-tag text-xs"></i>
+                                                    <%= car.brand %>
+                                                </span>
+                                                <% if car.model.present? %>
+                                                    <span class="ml-2 inline-flex items-center gap-1">
+                                                        <i class="fas fa-car-side text-xs"></i>
+                                                        <%= car.model %>
+                                                    </span>
+                                                    <% end %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Prix -->
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-euro-sign text-green-500"></i>
+                                        <div>
+                                            <div class="text-lg font-semibold text-gray-900">
+                                                <%= number_to_currency(car.price, unit: '' , precision: 0) %>€
+                                            </div>
+                                            <div class="text-xs text-gray-500">par jour</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Options -->
+                                <td class="px-6 py-4">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-cogs text-gray-400 mt-0.5"></i>
+                                        <div class="text-sm text-gray-500 line-clamp-2">
+                                            <%= car.options.presence || "Aucune option renseignée" %>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Disponibilité -->
+                                <td class="px-6 py-4 text-center">
+                                    <% if car.available %>
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Disponible
+                                        </span>
+                                        <% else %>
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-times-circle mr-1"></i>
+                                                Indisponible
+                                            </span>
+                                            <% end %>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <%= link_to provider_car_path(car),
+                                            class: "p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" , title: "Voir les détails" do %>
+                                            <i class="fas fa-eye"></i>
+                                            <% end %>
+                                                <%= link_to edit_provider_car_path(car),
+                                                    class: "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" , title: "Modifier" do %>
+                                                    <i class="fas fa-edit"></i>
+                                                    <% end %>
+                                                        <%= link_to provider_car_path(car), data: { turbo_method:
+                                                            :delete,
+                                                            turbo_confirm: "Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible."
+                                                            },
+                                                            class: "p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" , title: "Supprimer" do %>
+                                                            <i class="fas fa-trash"></i>
+                                                            <% end %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% end %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% else %>
+            <!-- État vide -->
+            <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+                <div class="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-car text-green-500 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Développez votre flotte automobile</h3>
+                <p class="text-gray-500 mb-6 max-w-md mx-auto">
+                    Ajoutez votre premier véhicule pour commencer à gérer vos locations et développer votre activité de
+                    location de voitures.
+                </p>
+                <%= link_to new_provider_car_path,
+                    class: "inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" do %>
+                    <i class="fas fa-plus mr-2"></i>
+                    Ajouter ma première voiture
+                    <% end %>
+            </div>
+            <% end %>
+</div>
+
+<%= content_for :scripts do %>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('carSearch');
+            const brandFilter = document.getElementById('brandFilter');
+            const availabilityFilter = document.getElementById('availabilityFilter');
+            const priceFilter = document.getElementById('priceFilter');
+            const carRows = document.querySelectorAll('.car-row');
+
+            function filterCars() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedBrand = brandFilter.value.toLowerCase();
+                const selectedAvailability = availabilityFilter.value;
+                const selectedPriceRange = priceFilter.value;
+
+                carRows.forEach(row => {
+                    const name = row.dataset.name || '';
+                    const brand = row.dataset.brand || '';
+                    const model = row.dataset.model || '';
+                    const available = row.dataset.available;
+                    const price = parseFloat(row.dataset.price) || 0;
+
+                    // Recherche textuelle
+                    const matchesSearch = name.includes(searchTerm) ||
+                        brand.includes(searchTerm) ||
+                        model.includes(searchTerm) ||
+                        row.textContent.toLowerCase().includes(searchTerm);
+
+                    // Filtre marque
+                    const matchesBrand = !selectedBrand || brand === selectedBrand;
+
+                    // Filtre disponibilité
+                    const matchesAvailability = !selectedAvailability || available === selectedAvailability;
+
+                    // Filtre prix
+                    let matchesPrice = true;
+                    if (selectedPriceRange) {
+                        switch (selectedPriceRange) {
+                            case '0-50':
+                                matchesPrice = price >= 0 && price <= 50;
+                                break;
+                            case '50-100':
+                                matchesPrice = price > 50 && price <= 100;
+                                break;
+                            case '100-200':
+                                matchesPrice = price > 100 && price <= 200;
+                                break;
+                            case '200+':
+                                matchesPrice = price > 200;
+                                break;
+                        }
+                    }
+
+                    row.style.display = matchesSearch && matchesBrand && matchesAvailability && matchesPrice ? '' : 'none';
+                });
+
+                // Mettre à jour le style des lignes visibles
+                updateVisibleRows();
+            }
+
+            function updateVisibleRows() {
+                const visibleRows = Array.from(carRows).filter(row => row.style.display !== 'none');
+                visibleRows.forEach((row, index) => {
+                    if (index === visibleRows.length - 1) {
+                        row.classList.add('border-b-0');
+                    } else {
+                        row.classList.remove('border-b-0');
+                    }
+                });
+            }
+
+            // Événements de filtrage
+            searchInput.addEventListener('input', filterCars);
+            brandFilter.addEventListener('change', filterCars);
+            availabilityFilter.addEventListener('change', filterCars);
+            priceFilter.addEventListener('change', filterCars);
+
+            // Animation du focus sur la recherche
+            searchInput.addEventListener('focus', function () {
+                this.parentElement.classList.add('ring-2', 'ring-green-500');
+            });
+
+            searchInput.addEventListener('blur', function () {
+                this.parentElement.classList.remove('ring-2', 'ring-green-500');
+            });
+        });
+    </script>
+    <% end %>

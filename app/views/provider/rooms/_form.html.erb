@@ -1,55 +1,136 @@
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow p-4 w-100" style="max-width: 600px;">
-    <h2 class="text-center mb-4"><%= @room.new_record? ? "Ajouter une chambre" : "Modifier la chambre" %></h2>
+<div class="max-w-4xl mx-auto p-6">
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- En-tête du formulaire -->
+    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <i class="fas fa-bed text-lg"></i>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-800">
+          <%= action_name == 'new' ? 'Nouvelle chambre' : 'Modifier la chambre' %>
+        </h2>
+      </div>
+      <p class="mt-2 text-sm text-gray-500">
+        Remplissez les informations ci-dessous pour <%= action_name == 'new' ? 'créer' : 'modifier' %> votre chambre
+      </p>
+    </div>
 
-    <%= form_with(model: [ :provider, @hotel, @room ], local: true, html: { multipart: true }) do |form| %>
+    <!-- Corps du formulaire -->
+    <div class="p-6">
+      <%= form_with(model: [@hotel, room], url: room.new_record? ? provider_hotel_rooms_path(@hotel) : provider_hotel_room_path(@hotel, room), local: true, method: room.new_record? ? :post : :patch, html: { class: "space-y-6", multipart: true }) do |f| %>
+        
+        <% if @room.errors.any? %>
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+              <h5 class="text-red-700 font-medium">
+                <%= pluralize(@room.errors.count, "erreur") %> empêchent la sauvegarde :
+              </h5>
+            </div>
+            <ul class="list-disc pl-5 text-sm text-red-600">
+              <% @room.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
 
-      <% if @room.errors.any? %>
-        <div class="alert alert-danger">
-          <h5><%= pluralize(@room.errors.count, "erreur") %> empêchent la sauvegarde :</h5>
-          <ul>
-            <% @room.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
+        <!-- Informations principales -->
+        <div class="space-y-6">
+          <div class="bg-blue-50 p-4 rounded-lg mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-blue-800">Informations de la chambre</h4>
+                <p class="text-sm text-blue-600">Ces informations seront affichées aux voyageurs</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="relative">
+              <div class="flex items-center space-x-2 mb-1">
+                <i class="fas fa-door-open text-gray-400"></i>
+                <%= f.label :type_room, "Type de chambre", class: "text-sm font-medium text-gray-700" %>
+              </div>
+              <p class="text-xs text-gray-500 mb-2">Ex: Simple, Double, Suite...</p>
+              <%= f.text_field :type_room, class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors", placeholder: "Type de chambre" %>
+            </div>
+
+            <div class="relative">
+              <div class="flex items-center space-x-2 mb-1">
+                <i class="fas fa-bed text-gray-400"></i>
+                <%= f.label :beds, "Nombre de lits", class: "text-sm font-medium text-gray-700" %>
+              </div>
+              <p class="text-xs text-gray-500 mb-2">Nombre total de lits dans la chambre</p>
+              <%= f.number_field :beds, min: 1, class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors", placeholder: "Nombre de lits" %>
+            </div>
+          </div>
+
+          <div class="relative">
+            <div class="flex items-center space-x-2 mb-1">
+              <i class="fas fa-concierge-bell text-gray-400"></i>
+              <%= f.label :services, "Services de la chambre", class: "text-sm font-medium text-gray-700" %>
+            </div>
+            <p class="text-xs text-gray-500 mb-2">Liste des services inclus dans la chambre (séparés par des virgules)</p>
+            <%= f.text_field :services, class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors", placeholder: "Ex: TV, Climatisation, Mini-bar..." %>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="relative">
+              <div class="flex items-center space-x-2 mb-1">
+                <i class="fas fa-euro-sign text-gray-400"></i>
+                <%= f.label :price, "Prix par nuit", class: "text-sm font-medium text-gray-700" %>
+              </div>
+              <p class="text-xs text-gray-500 mb-2">Tarif par nuit en euros</p>
+              <%= f.number_field :price, min: 0, step: "0.01", class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors", placeholder: "Prix par nuit" %>
+            </div>
+
+            <div class="relative">
+              <div class="flex items-center space-x-2 mb-1">
+                <i class="fas fa-check-circle text-gray-400"></i>
+                <%= f.label :available, "Disponibilité", class: "text-sm font-medium text-gray-700" %>
+              </div>
+              <div class="mt-4">
+                <label class="inline-flex items-center">
+                  <%= f.check_box :available, class: "form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500", checked: true %>
+                  <span class="ml-2 text-gray-700">Chambre disponible à la réservation</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="space-y-4 pt-6 border-t border-gray-100">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Photos de la chambre</h3>
+          
+          <div class="flex items-center justify-center w-full">
+            <label class="w-full flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                <p class="mb-2 text-sm text-gray-500">
+                  <span class="font-semibold">Cliquez pour ajouter</span> ou glissez et déposez
+                </p>
+                <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+              </div>
+              <%= f.file_field :photos, multiple: true, direct_upload: true, class: "hidden" %>
+            </label>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="flex flex-col sm:flex-row-reverse gap-3 pt-6 border-t border-gray-100">
+          <%= f.submit "Enregistrer", class: "w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
+          
+          <%= link_to provider_hotel_path(@hotel), class: "w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-center" do %>
+            Retour à l'hôtel
+          <% end %>
         </div>
       <% end %>
-
-      <div class="mb-3">
-        <%= form.label :type_room, "Type de chambre", class: "form-label" %>
-        <%= form.text_field :type_room, class: "form-control", placeholder: "Ex: Suite, Simple, Double..." %>
-      </div>
-
-      <div class="mb-3">
-        <%= form.label :price, "Prix", class: "form-label" %>
-        <%= form.number_field :price, step: 0.01, class: "form-control", placeholder: "Prix en FCFA ou €" %>
-      </div>
-
-      <div class="mb-3">
-        <%= form.label :beds, "Nombre de lits", class: "form-label" %>
-        <%= form.number_field :beds, min: 1, class: "form-control", placeholder: "Ex: 1, 2, 3..." %>
-      </div>
-
-      <div class="mb-3">
-        <%= form.label :services, "Services", class: "form-label" %>
-        <%= form.text_field :services, class: "form-control", placeholder: "Ex: WiFi, Clim, TV, Douche..." %>
-      </div>
-
-      <div class="form-check mb-3">
-        <%= form.check_box :available, class: "form-check-input", id: "room_available" %>
-        <%= form.label :available, "Disponible ?", class: "form-check-label", for: "room_available" %>
-      </div>
-
-      <div class="mb-3">
-        <%= form.label :images, "Photos de la chambre", class: "form-label" %>
-        <%= form.file_field :images, multiple: true, class: "form-control" %>
-      </div>
-
-      <div class="d-grid">
-        <%= form.submit(@room.new_record? ? "Créer la chambre" : "Mettre à jour", class: "btn btn-primary btn-block") %>
-      </div>
-    <% end %>
-    <br>
-    <%= link_to "Retour à l'hôtel", provider_hotel_path(@hotel), class: "btn btn-outline-secondary" %>
+    </div>
   </div>
+</div>
 </div>

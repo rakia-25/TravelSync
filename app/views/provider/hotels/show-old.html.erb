@@ -1,0 +1,97 @@
+<div class="container my-5 bg-white p-5 rounded shadow">
+  <!-- Nom de l'hôtel -->
+  <h1 class="text-center text-primary fw-bold mb-4 fs-2">
+    <%= @hotel.name %>
+  </h1>
+  <% if @hotel.rooms.empty? %>
+    <div class="alert alert-warning d-flex align-items-center rounded shadow-sm mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+      <div>
+        <strong>Attention :</strong> Cet hôtel n’a pas encore de chambres. Ajoutez-en pour le rendre visible aux clients.
+      </div>
+    </div>
+  <% end %>
+  <!-- Infos principales -->
+  <div class="text-center text-muted mb-4">
+    <p><strong class="text-dark">Ville :</strong> <%= @hotel.city %></p>
+    <p><strong class="text-dark">Adresse :</strong> <%= @hotel.address %></p>
+    <p><strong class="text-dark">Prestataire :</strong> <%= @hotel.provider.business %></p>
+  </div>
+  <!-- Galerie d'images -->
+  <% if @hotel.images.attached? %>
+    <div class="row g-3 mb-5">
+      <% @hotel.images.each do |image| %>
+        <div class="col-md-6">
+          <%= image_tag image.variant(resize_to_limit: [500, 300]), class: "img-fluid rounded shadow-sm" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <!-- Titre des chambres -->
+  <h2 class="text-center text-dark border-bottom pb-2 mb-4 fs-4 fw-semibold">Chambres disponibles</h2>
+  <div class="text-center mb-5">
+    <%= link_to "Ajouter une chambre", new_provider_hotel_room_path(@hotel), class: "btn btn-primary rounded-pill px-4 py-2" %>
+  </div>
+  <% if @hotel.rooms.any? %>
+    <div class="row g-4">
+      <% @hotel.rooms.each do |room| %>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-primary fw-bold mb-0"><%= room.type_room %></h5>
+                <span class="text-muted small"><%= room.beds %> lit(s)</span>
+              </div>
+              <p class="mb-2">
+                <strong>Services :</strong> <%=room.services %><br>
+                <strong>Prix :</strong> <%= number_to_currency(room.price, unit: "FCFA ") %><br>
+                <strong>Disponible :</strong>
+                <% if room.available %>
+                  <span class="badge bg-success">Oui</span>
+                <% else %>
+                  <span class="badge bg-danger">Non</span>
+                <% end %>
+              </p>
+              <% reservations = room.reservations.where.not(status: "canceled") %>
+              <% if room.available? && reservations.any? %>
+                <div class="alert alert-warning small mt-3">
+                  <strong>📅 Réservée pour :</strong>
+                  <ul class="mb-0 ps-3">
+                    <% reservations.each do |res| %>
+                      <li>
+                        Du <%= l res.start_date %> au <%= l res.end_date %>
+                        <% if res.status == "confirmed" %>
+                          <span class="text-success">(confirmée)</span>
+                        <% else %>
+                          <span class="text-muted">(en attente)</span>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+              <% if room.available?%>
+                <div class="d-flex flex-wrap gap-2 mt-3 justify-content-center">
+                  <%= link_to "Modifier", edit_provider_hotel_room_path(@hotel, room),
+                    class: "btn btn-sm btn-primary" %>
+                  <%= button_to "Supprimer", provider_hotel_room_path(@hotel, room),
+                      method: :delete,
+                      data: { confirm: "Supprimer cette chambre ?" },
+                      class: "btn btn-danger btn-sm" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-center text-muted mt-4 fst-italic">
+      Aucune chambre listée pour cet hôtel.
+    </p>
+  <% end %>
+
+  <hr class="my-5">
+  <%= link_to "Retour à la liste des hôtels", dashboard_provider_path, class: "btn btn-outline-primary" %>
+</div>

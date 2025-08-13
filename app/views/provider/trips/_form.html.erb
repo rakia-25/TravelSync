@@ -1,65 +1,225 @@
-<div class="container py-4">
-  <% if trip.errors.any? %>
-    <div class="alert alert-danger">
-      <h5><%= pluralize(trip.errors.count, "erreur") %> empêchent la création du voyage :</h5>
-      <ul class="mb-0">
-        <% trip.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+<div class="max-w-4xl mx-auto p-6">
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- En-tête du formulaire -->
+    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <i class="fas fa-route text-lg"></i>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-800">
+          <%= action_name=='new' ? 'Nouveau circuit' : 'Modifier le circuit' %>
+        </h2>
+      </div>
+      <p class="mt-2 text-sm text-gray-500">
+        Remplissez les informations ci-dessous pour <%= action_name=='new' ? 'créer' : 'modifier' %> votre circuit
+      </p>
     </div>
-  <% end %>
-  <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
-    <h2 class="text-center mb-4">
-      <%= action_name == 'new' ? 'Nouveau circuit' : 'Modifier le circuit' %>
-    </h2>
-    <%= form_with model: trip, url: trip.new_record? ? provider_trips_path : provider_trip_path(trip), method: trip.new_record? ? :post : :patch, local: true do |f| %>
-      <div class="mb-3">
-        <%= f.label :title, "Titre", class: "form-label" %>
-        <%= f.text_field :title, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :theme, "Thème", class: "form-label" %>
-        <%= f.select :theme, ['Culturel', 'Humanitaire', 'Professionnel', 'Loisir'], {}, class: "form-select" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :program, "Programme jour par jour", class: "form-label" %>
-        <%= f.text_area :program, rows: 6, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :departureDate, "Date de départ", class: "form-label" %>
-        <%= f.date_select :departureDate, { order: [:day, :month, :year] }, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :returnDate, "Date de retour", class: "form-label" %>
-        <%= f.date_select :returnDate, { order: [:day, :month, :year] }, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :duration, "Durée (en jours)", class: "form-label" %>
-        <%= f.number_field :duration, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :departureCity, "Ville de départ", class: "form-label" %>
-        <%= f.text_field :departureCity, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :destinationCity, "Ville de destination", class: "form-label" %>
-        <%= f.text_field :destinationCity, class: "form-control" %>
-      </div>
-      <div class="mb-3">
-        <%= f.label :price, "Prix (FCFA)", class: "form-label" %>
-        <%= f.number_field :price, step: 1000, placeholder: "Ex: 15000", class: "form-control" %>
-      </div>
-      <div class="col-12">
-        <label class="form-label">Photos</label>
-        <%= f.file_field :images, multiple: true, direct_upload: true, class: "form-control" %>
-      </div>
-      <div class="d-grid mt-4">
-        <%= f.submit trip.new_record? ? "Créer le circuit" : "Mettre à jour", class: "btn btn-primary" %>
-      </div>
-    <% end %>
-    <div class="d-grid mt-4">
-      <%= link_to "Retour", dashboard_provider_path, class: "btn btn-outline-secondary" %>
+
+    <!-- Corps du formulaire -->
+    <div class="p-6">
+      <%= form_with(model: trip, url: trip.new_record? ? provider_trips_path : provider_trip_path(trip), method:
+        trip.new_record? ? :post : :patch, local: true, html: { class: "space-y-6" , multipart: true }) do |f| %>
+
+        <% if trip.errors.any? %>
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+              <h5 class="text-red-700 font-medium">
+                <%= pluralize(trip.errors.count, "erreur" ) %> empêchent la sauvegarde :
+              </h5>
+            </div>
+            <ul class="list-disc pl-5 text-sm text-red-600">
+              <% trip.errors.full_messages.each do |message| %>
+                <li>
+                  <%= message %>
+                </li>
+                <% end %>
+            </ul>
+          </div>
+          <% end %>
+
+            <!-- Infos principales -->
+            <div class="space-y-6">
+              <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-blue-800">Informations principales</h4>
+                    <p class="text-sm text-blue-600">Ces infos seront affichées en premier aux voyageurs</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700" for="trip_title">
+                    <i class="fas fa-heading text-gray-400"></i>
+                    <span>Titre</span>
+                  </label>
+                  <%= f.text_field :title, id: "trip_title" ,
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors", placeholder: "Nom du circuit" %>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700" for="trip_theme">
+                    <i class="fas fa-tag text-gray-400"></i>
+                    <span>Thème</span>
+                  </label>
+                  <%= f.select :theme, ['Culturel', 'Humanitaire' , 'Professionnel' , 'Loisir' ], {},
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" , id: "trip_theme" %>
+                </div>
+              </div>
+
+              <div>
+                <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700" for="trip_program">
+                  <i class="fas fa-list-alt text-gray-400"></i>
+                  <span>Programme jour par jour</span>
+                </label>
+                <%= f.text_area :program, rows: 6, id: "trip_program" ,
+                  class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" , placeholder: "Décrivez le programme..." %>
+              </div>
+            </div>
+
+            <!-- Dates et durée -->
+            <div class="space-y-6 pt-6 border-t border-gray-100">
+              <div class="bg-green-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-calendar-alt text-green-500 text-xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-green-800">Dates et durée</h4>
+                    <p class="text-sm text-green-600">Précisez les dates et la durée du circuit</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700"
+                    for="trip_departureDate">
+                    <i class="fas fa-plane-departure text-gray-400"></i>
+                    <span>Date de départ</span>
+                  </label>
+                  <%= f.date_select :departureDate, { order: [:day, :month, :year] },
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , id: "trip_departureDate" %>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700"
+                    for="trip_returnDate">
+                    <i class="fas fa-plane-arrival text-gray-400"></i>
+                    <span>Date de retour</span>
+                  </label>
+                  <%= f.date_select :returnDate, { order: [:day, :month, :year] },
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , id: "trip_returnDate" %>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700" for="trip_duration">
+                    <i class="fas fa-hourglass-half text-gray-400"></i>
+                    <span>Durée (jours)</span>
+                  </label>
+                  <%= f.number_field :duration, id: "trip_duration" ,
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" , placeholder: "Ex: 14" %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Villes -->
+            <div class="space-y-6 pt-6 border-t border-gray-100">
+              <div class="bg-yellow-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-map-marker-alt text-yellow-500 text-xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-yellow-800">Villes</h4>
+                    <p class="text-sm text-yellow-600">Ville de départ et de destination</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700"
+                    for="trip_departureCity">
+                    <i class="fas fa-city text-gray-400"></i>
+                    <span>Ville de départ</span>
+                  </label>
+                  <%= f.text_field :departureCity, id: "trip_departureCity" ,
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" , placeholder: "Ex: Paris" %>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700"
+                    for="trip_destinationCity">
+                    <i class="fas fa-map-marked-alt text-gray-400"></i>
+                    <span>Ville de destination</span>
+                  </label>
+                  <%= f.text_field :destinationCity, id: "trip_destinationCity" ,
+                    class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" , placeholder: "Ex: Rome" %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prix -->
+            <div class="space-y-6 pt-6 border-t border-gray-100">
+              <div class="bg-red-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-euro-sign text-red-500 text-xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-red-800">Prix</h4>
+                    <p class="text-sm text-red-600">Prix du circuit en FCFA</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="flex items-center space-x-2 mb-1 text-sm font-medium text-gray-700" for="trip_price">
+                  <i class="fas fa-money-bill-wave text-gray-400"></i>
+                  <span>Prix (FCFA)</span>
+                </label>
+                <%= f.number_field :price, step: 1000, placeholder: "Ex: 15000" , id: "trip_price" ,
+                  class: "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  %>
+              </div>
+            </div>
+
+            <!-- Photos -->
+            <div class="space-y-4 pt-6 border-t border-gray-100">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Photos du circuit</h3>
+
+              <div class="flex items-center justify-center w-full">
+                <label
+                  class="w-full flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                    <p class="mb-2 text-sm text-gray-500">
+                      <span class="font-semibold">Cliquez pour ajouter</span> ou glissez et déposez
+                    </p>
+                    <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                  </div>
+                  <%= f.file_field :images, multiple: true, direct_upload: true, class: "hidden" %>
+                </label>
+              </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex flex-col sm:flex-row-reverse gap-3 pt-6 border-t border-gray-100">
+              <%= f.submit trip.new_record? ? "Créer le circuit" : "Mettre à jour" ,
+                class: "w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                %>
+                <%= link_to dashboard_provider_path,
+                  class: "w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-center" do %>
+                  Retour au tableau de bord
+                  <% end %>
+            </div>
+            <% end %>
     </div>
   </div>
 </div>

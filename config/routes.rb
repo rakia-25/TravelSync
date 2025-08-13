@@ -8,7 +8,11 @@ Rails.application.routes.draw do
   root "home#index"
   
   #dashboard des prestataires
-  get "dashboard/provider", to: "dashboards#provider", as: :dashboard_provider
+  get 'dashboard/provider', to: 'dashboards#provider', as: :dashboard_provider
+  get 'dashboard/provider/export', to: 'dashboards#export_data', as: :dashboard_provider_export
+  
+
+
   
   # Ressource provider unique par user
   #permet de definir le profil du prestataire
