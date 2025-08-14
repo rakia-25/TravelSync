@@ -164,20 +164,24 @@
             <i class="fas fa-chart-line text-xl"></i>
           </div>
         </div>
-        
+         
+          <% taux_utilisation = @total_cars.to_i > 0 ? ((@rented_cars.to_f / @total_cars) * 100).round : 0 %>
+
         <div>
           <p class="text-sm font-medium text-gray-500 mb-1">Taux d'utilisation</p>
           <h3 class="text-2xl font-bold text-gray-900 mb-3">
-            <%= ((@rented_cars.to_f / @total_cars) * 100).round %>%
+            <%= taux_utilisation %>%
           </h3>
         </div>
-        
-        <div class="relative">
-          <div class="overflow-hidden h-2 rounded-full bg-pink-100/50">
-            <div class="h-full rounded-full bg-pink-500 transition-all duration-500" 
-                 style="width: <%= ((@rented_cars.to_f / @total_cars) * 100).round %>%">
+
+          <div class="relative">
+            <div class="overflow-hidden h-2 rounded-full bg-pink-100/50">
+              <div class="h-full rounded-full bg-pink-500 transition-all duration-500" 
+                  style="width: <%= taux_utilisation %>%">
+              </div>
             </div>
           </div>
+
           <div class="flex items-center justify-between mt-2 text-xs font-medium">
             <span class="text-gray-500">Flotte utilisée</span>
             <span class="text-pink-600"><%= @rented_cars %>/<%= @total_cars %></span>
